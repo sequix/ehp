@@ -7,11 +7,10 @@ case ${1:-build} in
     build)
         mkdir -p $BUILD_DIR
         cd $BUILD_DIR
-        cmake3 $CUR_DIR
+        cmake $CUR_DIR
         make
         ;;
     clean)
         rm -rf $BUILD_DIR
-        rm src/config.h
         ;;
 esac

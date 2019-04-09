@@ -1,0 +1,6 @@
+# this is comment, no support for comment within a line
+address: 127.0.0.1
+port: 8080
+worker: 4
+log_file: /home/squix/code/http/ehp/_output/ehp.log
+route: GET / /home/squix/code/http/ehp/root

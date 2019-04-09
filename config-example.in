@@ -1,0 +1,6 @@
+# this is comment, no support for comment within a line
+address: 127.0.0.1
+port: 8080
+worker: 4
+log_file: @PROJECT_BINARY_DIR@/@ehp_log_file@
+route: GET / @PROJECT_SOURCE_DIR@/@ehp_www_root@

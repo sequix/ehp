@@ -1,4 +1,4 @@
-#include "cmdopt.h"
+#include "args.h"
 #include "config.h"
 #include <stdlib.h>
 

@@ -5,3 +5,17 @@
 #define EHP_VERSION_MAJOR @ehp_version_major@
 #define EHP_VERSION_MINOR @ehp_version_minor@
 #define EHP_VERSION_PATCH @ehp_version_patch@
+#define EHP_DEFAULT_LOG_FILE "@ehp_default_log_file@"
+
+#include "map.h"
+#include "array.h"
+
+typedef struct {
+    // store all configurations but 'route' as KV pairs
+    ehp_map_t *props;
+
+    // store all route as an arry, which will be used to build a radix tree
+    ehp_array_t *routes;
+} ehp_config_t;
+
+ehp_config_t *ehp_config_read_from(const char *filename);
