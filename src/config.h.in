@@ -1,0 +1,7 @@
+#pragma once
+
+#define EHP_NAME "@project_name@"
+
+#define EHP_VERSION_MAJOR @ehp_version_major@
+#define EHP_VERSION_MINOR @ehp_version_minor@
+#define EHP_VERSION_PATCH @ehp_version_patch@

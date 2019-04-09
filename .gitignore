@@ -1,3 +1,6 @@
+# ehp build directory
+_output
+
 # Prerequisites
 *.d
 
