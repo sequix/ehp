@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include "map.h"
 
-ehp_map_t *ehp_map_new(size_t nbuckets)
+map_t *map_new(size_t nbuckets)
 {
-    ehp_map_t *map = (ehp_map_t*)malloc(sizeof(ehp_map_t));
+    map_t *map = (map_t*)malloc(sizeof(map_t));
     if (map == NULL) {
         return NULL;
     }
-    map->buckets = (ehp_map_node_t**)calloc(nbuckets, sizeof(ehp_map_node_t*));
+    map->buckets = (map_node_t**)calloc(nbuckets, sizeof(map_node_t*));
     if (map->buckets == NULL) {
         return NULL;
     }
@@ -17,11 +17,11 @@ ehp_map_t *ehp_map_new(size_t nbuckets)
     return map;
 }
 
-void ehp_map_free(ehp_map_t *map)
+void map_free(map_t *map)
 {
     int nbuckets = map->nbuckets;
-    ehp_map_node_t **buckets = map->buckets;
-    ehp_map_node_t *p, *next;
+    map_node_t **buckets = map->buckets;
+    map_node_t *p, *next;
 
     for (int i = 0; i < nbuckets; ++i) {
         if (buckets[i] == NULL) {
@@ -37,19 +37,19 @@ void ehp_map_free(ehp_map_t *map)
     }
 }
 
-static ehp_map_hash_t ehp_map_hash(const ehp_map_t *map, const char *s)
+static map_hash_t map_hash(const map_t *map, const char *s)
 {
-    ehp_map_hash_t hashval = 0;
+    map_hash_t hashval = 0;
     for (; *s; ++s)
         hashval = *s + 31 * hashval;
     return hashval % map->nbuckets;
 }
 
-static ehp_map_node_t *ehp_map_new_node(const ehp_map_t *map, const char *key, const char *value)
+static map_node_t *map_new_node(const map_t *map, const char *key, const char *value)
 {
     int key_len = strlen(key) + 1;
     int value_len = strlen(value) + 1;
-    ehp_map_node_t *node = (ehp_map_node_t*)malloc(sizeof(ehp_map_node_t));
+    map_node_t *node = (map_node_t*)malloc(sizeof(map_node_t));
     if (node == NULL) {
         perror("malloc for node");
         return NULL;
@@ -67,16 +67,16 @@ static ehp_map_node_t *ehp_map_new_node(const ehp_map_t *map, const char *key, c
         free(node);
         return NULL;
     }
-    node->hash = ehp_map_hash(map, key);
+    node->hash = map_hash(map, key);
     strncpy(node->key, key, key_len);
     strncpy(node->value, value, value_len);
     return node;
 }
 
-static ehp_map_node_t *map_getref(const ehp_map_t *map, const char *key)
+static map_node_t *map_getref(const map_t *map, const char *key)
 {
-    ehp_map_hash_t hash = ehp_map_hash(map, key);
-    ehp_map_node_t *p = map->buckets[hash];
+    map_hash_t hash = map_hash(map, key);
+    map_node_t *p = map->buckets[hash];
 
     while (p) {
         if (p->hash == hash && !strcmp(p->key, key)) {
@@ -87,12 +87,12 @@ static ehp_map_node_t *map_getref(const ehp_map_t *map, const char *key)
     return NULL;
 }
 
-int ehp_map_set(ehp_map_t *map, const char *key, const char *value)
+int map_set(map_t *map, const char *key, const char *value)
 {
     if (key == NULL || *key == '\0' || value == NULL) {
         return -1;
     }
-    ehp_map_node_t *p = map_getref(map, key);
+    map_node_t *p = map_getref(map, key);
     if (p != NULL) {
         int new_value_len = strlen(value) + 1;
         int old_value_len = strlen(p->value) + 1; 
@@ -107,15 +107,15 @@ int ehp_map_set(ehp_map_t *map, const char *key, const char *value)
         strncpy(p->value, value, new_value_len);
         return 0;
     }
-    p = ehp_map_new_node(map, key, value);
+    p = map_new_node(map, key, value);
     p->next = map->buckets[p->hash];
     map->buckets[p->hash] = p;
     return 0;
 }
 
-char *ehp_map_get(const ehp_map_t *map, const char *key)
+char *map_get(const map_t *map, const char *key)
 {
-    ehp_map_node_t *p = map_getref(map, key);
+    map_node_t *p = map_getref(map, key);
     if (p != NULL) {
         return p->value;
     }

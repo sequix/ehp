@@ -2,25 +2,24 @@
 
 #include <stdlib.h>
 
-typedef unsigned ehp_map_hash_t;
+typedef unsigned map_hash_t;
 
-struct ehp_map_node_t {
-    ehp_map_hash_t hash;
+typedef struct map_node_t {
+    map_hash_t hash;
     char *key;
     char *value;
-    struct ehp_map_node_t *next;
-};
+    struct map_node_t *next;
+} map_node_t;
 
-typedef struct ehp_map_node_t ehp_map_node_t;
-
-struct ehp_map_t {
+typedef struct {
     size_t nbuckets;
-    ehp_map_node_t **buckets;
-};
+    map_node_t **buckets;
+} map_t ;
 
-typedef struct ehp_map_t ehp_map_t;
+map_t *map_new(size_t nbuckets);
 
-ehp_map_t *ehp_map_new(size_t nbuckets);
-void ehp_map_free(ehp_map_t *map);
-int ehp_map_set(ehp_map_t *map, const char *key, const char *value);
-char *ehp_map_get(const ehp_map_t *map, const char *key);
+void map_free(map_t *map);
+
+int map_set(map_t *map, const char *key, const char *value);
+
+char *map_get(const map_t *map, const char *key);

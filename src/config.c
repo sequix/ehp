@@ -17,12 +17,12 @@ static ehp_config_t *ehp_config_new(void)
         return NULL;
     }
 
-    config->props = ehp_map_new(32);
+    config->props = map_new(32);
     if (config->props == NULL) {
         return NULL;
     }
 
-    config->routes = ehp_array_new();
+    config->routes = array_new();
     if (config->routes == NULL) {
         return NULL;
     }
@@ -69,7 +69,7 @@ ehp_config_t *ehp_config_read_from(const char *filename)
                 exit(1);
             }
             strncpy(rrule, value, len);
-            if (ehp_array_append(config->routes, (void*)rrule) < 0) {
+            if (array_push_back(config->routes, (void*)rrule) < 0) {
                 ehp_log_error("config: array append");
                 exit(1);
             }
@@ -77,7 +77,7 @@ ehp_config_t *ehp_config_read_from(const char *filename)
         }
 
         // a kv property
-        if (ehp_map_set(config->props, key, value) < 0) {
+        if (map_set(config->props, key, value) < 0) {
             ehp_log_error("config: map set");
             exit(1);
             continue;

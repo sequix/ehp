@@ -12,10 +12,10 @@
 
 typedef struct {
     // store all configurations but 'route' as KV pairs
-    ehp_map_t *props;
+    map_t *props;
 
     // store all route as an arry, which will be used to build a radix tree
-    ehp_array_t *routes;
+    array_t *routes;
 } ehp_config_t;
 
 ehp_config_t *ehp_config_read_from(const char *filename);

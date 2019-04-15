@@ -1,9 +1,9 @@
 #include "array.h"
 #include <stdio.h>
 
-ehp_array_t *ehp_array_new(void)
+array_t *array_new(void)
 {
-    ehp_array_t *arr = (ehp_array_t*)malloc(sizeof(ehp_array_t));
+    array_t *arr = (array_t*)malloc(sizeof(array_t));
     if (arr == NULL) {
         return NULL;
     }
@@ -16,7 +16,7 @@ ehp_array_t *ehp_array_new(void)
     return arr;
 }
 
-static int ehp_array_realloc(ehp_array_t *arr)
+static int array_realloc(array_t *arr)
 {
     int new_capacity = arr->capacity << 1;
     arr->array = (void**)realloc(arr->array, new_capacity);
@@ -27,13 +27,13 @@ static int ehp_array_realloc(ehp_array_t *arr)
     return 0;
 }
 
-int ehp_array_append(ehp_array_t *arr, void *elem)
+int array_push_back(array_t *arr, void *elem)
 {
     if (arr == NULL) {
         return -1;
     }
     if (arr->size >= arr->capacity) {
-        ehp_array_realloc(arr);
+        array_realloc(arr);
     }
     arr->array[arr->size++] = elem;
     return 0;
