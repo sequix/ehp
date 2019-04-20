@@ -1,11 +1,11 @@
 #pragma once
 
+#include "url.h"
 #include "map.h"
+#include <sys/types.h>
 
 typedef map_t http_header_t;
 int   http_header_insert(http_header_t *header, const char *line);
-int   http_header_insert_batch(http_header_t *header, const char *str);
-int   http_header_insert_from(http_header_t *header, int fd);
 char* http_header_get(http_header_t *header, const char *key);
 int   http_header_set(http_header_t *header, const char *key, const char *value);
 
@@ -22,3 +22,32 @@ extern http_method_t HTTP_METHOD_HEAD;
 extern http_method_t HTTP_METHOD_CONNECT;
 extern http_method_t HTTP_METHOD_TRACE;
 extern http_method_t HTTP_METHOD_OPTIONS;
+
+typedef const char *http_version_t;
+extern http_version_t HTTP_VERSION_1_0;
+extern http_version_t HTTP_VERSION_1_1;
+extern http_version_t HTTP_VERSION_2;
+
+typedef struct {
+    // TODO: remote-end ip
+    int            clientfd;
+    http_method_t  method;
+    url_t*         addr;
+    http_version_t version;
+    http_header_t* headers;
+    size_t         body_len;
+    char*          body;
+    size_t         raw_len;
+    char*          raw;
+} http_req_t;
+
+http_req_t *http_req_new(char *raw, size_t len, int clientfd);
+
+typedef struct {
+    http_version_t     version;
+    http_status_code_t status;
+    http_header_t      headers;
+    char*              body;
+} http_rsp_t;
+
+typedef int (*http_handler_t)(const http_req_t *request, http_rsp_t *response);

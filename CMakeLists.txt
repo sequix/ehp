@@ -1,19 +1,22 @@
 cmake_minimum_required (VERSION 2.8)
 
+# configs
 set (project_name ehp)
-set (ehp_version_major 0)
-set (ehp_version_minor 0)
-set (ehp_version_patch 0)
+set (version_major 0)
+set (version_minor 1)
+set (version_patch 0)
 
-set (ehp_www_root root)
+set (www_root root)
 
-set (ehp_log_file ehp.log)
-set (ehp_default_log_file ehp.log)
+set (log_file ehp.log)
+set (default_log_file ehp.log)
 
 project (${project_name})
 add_compile_options(-std=c99)
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
-# configuration
+# config files
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/config.h.in"
   "${PROJECT_SOURCE_DIR}/src/config.h"

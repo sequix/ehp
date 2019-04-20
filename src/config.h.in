@@ -1,11 +1,11 @@
 #pragma once
 
-#define EHP_NAME "@project_name@"
+#define NAME "@project_name@"
 
-#define EHP_VERSION_MAJOR @ehp_version_major@
-#define EHP_VERSION_MINOR @ehp_version_minor@
-#define EHP_VERSION_PATCH @ehp_version_patch@
-#define EHP_DEFAULT_LOG_FILE "@ehp_default_log_file@"
+#define VERSION_MAJOR @version_major@
+#define VERSION_MINOR @version_minor@
+#define VERSION_PATCH @version_patch@
+#define DEFAULT_LOG_FILE "@default_log_file@"
 
 #include "map.h"
 #include "array.h"
@@ -16,6 +16,12 @@ typedef struct {
 
     // store all route as an arry, which will be used to build a radix tree
     array_t *routes;
-} ehp_config_t;
+} config_t;
 
-ehp_config_t *ehp_config_read_from(const char *filename);
+extern config_t *config;
+
+config_t *config_init(const char *filename);
+
+#define config_get(key) map_get((config)->props, (key))
+
+#define config_get_int(key) atoi(map_get((config)->props, (key)))

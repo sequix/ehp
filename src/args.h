@@ -3,12 +3,13 @@
 // TODO: remove argtable, implement yourself
 #include "argtable3.h"
 
-#define ehp_args_num 6
-extern struct arg_lit *ehp_args_help;
-extern struct arg_lit *ehp_args_version;
-extern struct arg_lit *ehp_args_verbose;
-extern struct arg_lit *ehp_args_daemon;
-extern struct arg_file *ehp_args_config_file;
-extern struct arg_end *ehp_args_err;
+#define args_num 7
+extern  struct   arg_lit  *args_help;
+extern  struct   arg_lit  *args_version;
+extern  struct   arg_lit  *args_verbose;
+extern  struct   arg_lit  *args_daemon;
+extern  struct   arg_file *args_config_file;
+extern  struct   arg_file *args_log_file;
+extern  struct   arg_end  *args_err;
 
-int ehp_args_handle(int argc, char *argv[]);
+int args_handle(int argc, char *argv[]);

@@ -1,7 +1,9 @@
 #include <ctype.h>
 #include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
 
-char *ehp_util_trim(char *s)
+char *str_trim(char *s)
 {
     if (s == NULL) {
         return NULL;
@@ -24,7 +26,7 @@ char *ehp_util_trim(char *s)
     return s;
 }
 
-char *ehp_util_trim_left(char *s)
+char *str_trim_left(char *s)
 {
     if (s == NULL) {
         return NULL;
@@ -43,7 +45,7 @@ char *ehp_util_trim_left(char *s)
     return s;
 }
 
-char *ehp_util_trim_right(char *s)
+char *str_trim_right(char *s)
 {
     if (s == NULL) {
         return NULL;
@@ -55,4 +57,37 @@ char *ehp_util_trim_right(char *s)
     }
     s[right+1] = '\0';
     return s;
+}
+
+// copy string to heap, return pointer to the copied string
+char *str_copy(const char *s)
+{
+    size_t len = strlen(s) + 1;
+    char *sp = (char*)malloc(len);
+    if (sp == NULL) {
+        return NULL;
+    }
+    strncpy(sp, s, len);
+    return sp;
+}
+
+// copy most n chars to heap, return pointer to the copied string
+char *str_copy_n(const char *s, size_t n)
+{
+    char *sp = (char*)malloc(n+1);
+    if (sp == NULL) {
+        return NULL;
+    }
+    strncpy(sp, s, n);
+    sp[n] = '\0';
+    return sp;
+}
+
+int fd_set_nonblocking(int fd)
+{
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) {
+        return -1;
+    }
+    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }

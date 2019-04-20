@@ -113,6 +113,21 @@ int map_set(map_t *map, const char *key, const char *value)
     return 0;
 }
 
+// given "key: value"
+int map_set_from_line(map_t *map, char *s)
+{
+    char *psep = strchr(s, ':');
+    if (psep == NULL) {
+        return -1;
+    }
+    *psep = '\0';
+    char *key = s;
+    char *value = psep + 2;
+    int ret = map_set(map, key, value);
+    *psep = ':';
+    return ret;
+}
+
 char *map_get(const map_t *map, const char *key)
 {
     map_node_t *p = map_getref(map, key);

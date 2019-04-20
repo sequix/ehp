@@ -8,16 +8,19 @@
 #include "log.h"
 
 // max line length of config file
-#define EHP_CONFIG_MAXLINE 8192
+#define CONFIG_MAXLINE 8192
 
-static ehp_config_t *ehp_config_new(void)
+// the global config
+config_t *config = NULL;
+
+static config_t *config_new(void)
 {
-    ehp_config_t *config = (ehp_config_t*)malloc(sizeof(ehp_config_t));
+    config_t *config = talloc(config_t);
     if (config == NULL) {
         return NULL;
     }
 
-    config->props = map_new(32);
+    config->props = map_new(16);
     if (config->props == NULL) {
         return NULL;
     }
@@ -29,23 +32,23 @@ static ehp_config_t *ehp_config_new(void)
     return config;
 }
 
-ehp_config_t *ehp_config_read_from(const char *filename)
+config_t *config_init(const char *filename)
 {
-    char buf[EHP_CONFIG_MAXLINE];
+    char buf[CONFIG_MAXLINE];
 
     FILE *f = fopen(filename, "r");
     if (f == NULL) {
         return NULL;
     }
 
-    ehp_config_t *config = ehp_config_new();
+    config = config_new();
     if (config == NULL) {
         return NULL;
     }
 
     // TODO: fetch this part as single function
     while (fgets(buf, sizeof(buf), f) != NULL) {
-        char *s = ehp_util_trim(buf);
+        char *s = str_trim(buf);
 
         // comment line
         if (*s == '#') {
@@ -65,12 +68,12 @@ ehp_config_t *ehp_config_read_from(const char *filename)
             int len = strlen(value) + 1;
             char *rrule = (char*)malloc(len);
             if (rrule == NULL) {
-                ehp_log_error("config: malloc");
+                log_error("config: malloc");
                 exit(1);
             }
             strncpy(rrule, value, len);
             if (array_push_back(config->routes, (void*)rrule) < 0) {
-                ehp_log_error("config: array append");
+                log_error("config: array append");
                 exit(1);
             }
             continue;
@@ -78,7 +81,7 @@ ehp_config_t *ehp_config_read_from(const char *filename)
 
         // a kv property
         if (map_set(config->props, key, value) < 0) {
-            ehp_log_error("config: map set");
+            log_error("config: map set");
             exit(1);
             continue;
         }

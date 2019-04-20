@@ -1,10 +1,23 @@
 #pragma once
 
+#include <stdlib.h>
+
+#define talloc(type) ((type*)malloc(sizeof(type)))
+
 // trim space from both sides
-char *ehp_util_trim(char *s);
+char *str_trim(char *s);
 
 // trim space from left side
-char *ehp_util_trim_left(char *s);
+char *str_trim_left(char *s);
 
 // trim space from right side
-char *ehp_util_trim_right(char *s);
+char *str_trim_right(char *s);
+
+// copy string to heap, return pointer to the copied string
+char *str_copy(const char *s);
+
+// copy most n chars to heap, return pointer to the copied string
+char *str_copy_n(const char *s, size_t n);
+
+// set non-blocking
+int fd_set_nonblocking(int fd);

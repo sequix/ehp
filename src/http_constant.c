@@ -1,5 +1,6 @@
 #include "http.h"
 
+// HTTP Status Code
 static const char *http_status_msg_1xx[] = {
     "Continue",            // 100
     "Switching Protocols", // 101
@@ -17,11 +18,12 @@ static const char *http_status_msg_2xx[] = {
     "Partial Content",               // 206 (RFC 7233)
     "Multi-Status",                  // 207 (WebDAV; RFC 4918)
     "Already Reported",              // 208 (WebDAV; RFC 5842)
+    // TODO: padding here
     "IM Used",                       // 226 (RFC 3229)
-    "Multiple Choices"               // 300
 };
 
 static const char *http_status_msg_3xx[] = {
+    "Multiple Choices"    // 300
     "Moved Permanently",  // 301
     "Found",              // 302 (Previously "Moved temporarily")
     "See Other",          // 303 (since HTTP/1.1)
@@ -52,6 +54,7 @@ static const char *http_status_msg_4xx[] = {
     "Range Not Satisfiable",           // 416 (RFC 7233)
     "Expectation Failed",              // 417
     "I'm a teapot",                    // 418 (RFC 2324
+    // TODO: padding here
     "Misdirected Request",             // 421 (RFC 7540)
     "Unprocessable Entity",            // 422 (WebDAV; RFC 4918)
     "Locked",                          // 423 (WebDAV; RFC 4918)
@@ -74,6 +77,7 @@ static const char *http_status_msg_5xx[] = {
     "Variant Also Negotiates",         // 506 (RFC 2295)
     "Insufficient Storage",            // 507 (WebDAV; RFC 4918)
     "Loop Detected",                   // 508 (WebDAV; RFC 5842)
+    // TODO: padding here
     "Not Extended",                    // 510 (RFC 2774)
     "Network Authentication Required"  // 511 (RFC 6585)
 };
@@ -100,3 +104,19 @@ const char *http_get_status_msg(http_status_code_t code)
     }
     return NULL;
 }
+
+// HTTP Methods
+http_method_t HTTP_METHOD_GET     = "GET";
+http_method_t HTTP_METHOD_POST    = "POST";
+http_method_t HTTP_METHOD_PUT     = "PUT";
+http_method_t HTTP_METHOD_DELETE  = "DELETE";
+http_method_t HTTP_METHOD_PATCH   = "PATCH";
+http_method_t HTTP_METHOD_HEAD    = "HEAD";
+http_method_t HTTP_METHOD_CONNECT = "CONNECT";
+http_method_t HTTP_METHOD_TRACE   = "TRACE";
+http_method_t HTTP_METHOD_OPTIONS = "OPTIONS";
+
+// HTTP Version
+http_version_t HTTP_VERSION_1_0 = "HTTP/1.0";
+http_version_t HTTP_VERSION_1_1 = "HTTP/1.1";
+http_version_t HTTP_VERSION_2   = "HTTP/2";

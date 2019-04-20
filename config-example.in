@@ -1,6 +1,8 @@
 # this is comment, no support for comment within a line
 address: 127.0.0.1
-port: 8080
+port: 8081
 worker: 4
-log_file: @PROJECT_BINARY_DIR@/@ehp_log_file@
-route: GET / @PROJECT_SOURCE_DIR@/@ehp_www_root@
+backlog: 32
+log_file: @PROJECT_SOURCE_DIR@/@log_file@
+www_root: @PROJECT_SOURCE_DIR@/@www_root@
+route: GET / @PROJECT_SOURCE_DIR@/@www_root@
