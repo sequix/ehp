@@ -13,3 +13,7 @@ $ ./build.sh
 # Clean _output and so on, with:
 $ ./build.sh clean
 ```
+
+## Where did you get the test site in /root?
+
+Generated with hugo(gohugo.io) and Jane (xianmin/hugo-theme-jane)
