@@ -7,6 +7,13 @@
 #define VERSION_PATCH @version_patch@
 #define DEFAULT_LOG_FILE "@default_log_file@"
 
+#define CONFIG_ADDRESS  "address"
+#define CONFIG_PORT     "port"
+#define CONFIG_WORKER   "worker"
+#define CONFIG_BACKLOG  "backlog"
+#define CONFIG_LOG_FILE "log_file"
+#define CONFIG_WWW_ROOT "www_root"
+
 #include "map.h"
 #include "array.h"
 
@@ -23,5 +30,4 @@ extern config_t *config;
 config_t *config_init(const char *filename);
 
 #define config_get(key) map_get((config)->props, (key))
-
 #define config_get_int(key) atoi(map_get((config)->props, (key)))

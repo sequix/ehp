@@ -2,6 +2,10 @@
 #include "util.h"
 #include "regexp.h"
 #include "log.h"
+#include "map.h"
+#include <string.h>
+#include <unistd.h>
+#include <stdio.h>
 
 static char *next_line(char *last_line)
 {
@@ -72,4 +76,51 @@ http_req_t *http_req_new(char *raw, size_t len, int clientfd)
     //req->body_len = len;
     //req->body = body;
     return req;
+}
+
+http_rsp_t *http_rsp_new(void)
+{
+    http_rsp_t *rsp = talloc(http_rsp_t);
+    if (rsp == NULL) {
+        log_error("malloc");
+        return NULL;
+    }
+
+    rsp->headers = http_header_new();
+    if (rsp->headers == NULL) {
+        log_error("malloc");
+        return NULL;
+    }
+    return rsp;
+}
+
+void http_rsp_free(http_rsp_t *rsp)
+{
+    http_header_free(rsp->headers);
+    free(rsp);
+}
+
+int http_rsp_write(http_rsp_t *rsp, int fd)
+{
+    char buf[1024];
+
+    sprintf(buf, "%s %d %s\r\n", rsp->version, rsp->status, http_get_status_msg(rsp->status));
+    int len = strlen(buf);
+    if (write(fd, buf, len) != len) {
+        log_error("write() response head line");
+        return -1;
+    }
+
+    sprintf(buf, "Content-Length: %d\r\n\r\n", rsp->len);
+    len = strlen(buf);
+    if (write(fd, buf, len) != len) {
+        log_error("write() response Content length header");
+        return -1;
+    }
+
+    if (write(fd, rsp->body, rsp->len) != rsp->len) {
+        log_error("write() respones body");
+        return -1;
+    }
+    return 0;
 }

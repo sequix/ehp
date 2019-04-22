@@ -1,4 +1,5 @@
 #include "poller.h"
+#include "file.h"
 #include "log.h"
 #include "util.h"
 #include "http.h"
@@ -57,7 +58,8 @@ static void poller_handle_new_conn(poller_t *plr)
             log_error("accept()");
             continue;
         }
-        fd_set_nonblocking(newfd);
+        log_debug("new conn at %d", newfd);
+        file_set_nonblock(newfd);
 
         ev.events = EPOLLIN | EPOLLET;
         ev.data.fd = newfd;
@@ -77,9 +79,11 @@ static http_req_t *poller_handle_request(poller_t *plr, int fd)
     struct epoll_event ev = {0};
 
     while (1) {
+        log_debug("new request from %d", fd);
         int len = recv(fd, pbuf, size, 0);
         if (len < 0) {
             if (errno == EWOULDBLOCK) {
+                errno = 0;
                 break;
             }
             log_error("recv()");
@@ -103,7 +107,7 @@ static http_req_t *poller_handle_request(poller_t *plr, int fd)
         }
     }
     if (close_conn) {
-        log_debug("closing fd %d", fd);
+        log_debug("closing conn %d", fd);
         ev.events = EPOLLIN | EPOLLET;
         ev.data.fd = fd;
         epoll_ctl(plr->epollfd, EPOLL_CTL_DEL, fd, &ev);
@@ -115,10 +119,9 @@ static http_req_t *poller_handle_request(poller_t *plr, int fd)
 
 http_req_t *poller_wait(poller_t *plr)
 {
-    log_debug("listenfd: %d\n", plr->listenfd);
     while (1) {
-        log_debug("waiting inside...");
         if (plr->size == 0) {
+            log_debug("waiting inside...");
             int nfds = epoll_wait(plr->epollfd, plr->events, plr->cap,
                     plr->timeout);
             log_debug("nfds: %d", nfds);
@@ -129,9 +132,7 @@ http_req_t *poller_wait(poller_t *plr)
         }
 
         while (plr->size > 0) {
-            // TODO: is there will be a order problem here?
             int fd = plr->events[--plr->size].data.fd;
-            log_debug("fd: %d\n", fd);
             if (fd == plr->listenfd) {
                 poller_handle_new_conn(plr);
                 continue;

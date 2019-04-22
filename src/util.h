@@ -19,5 +19,3 @@ char *str_copy(const char *s);
 // copy most n chars to heap, return pointer to the copied string
 char *str_copy_n(const char *s, size_t n);
 
-// set non-blocking
-int fd_set_nonblocking(int fd);

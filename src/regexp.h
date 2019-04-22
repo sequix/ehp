@@ -10,7 +10,7 @@ typedef regmatch_t regexp_submatch_t;
 extern regexp_t *regexp_url;
 
 // first line of http request: '<method> <path> <version>'
-#define REGEXP_PTRN_HTTP_REQ_FIRST "^\\([A-Z]*\\) \\([^ ]*\\) \\([^ ]*\\)"
+#define REGEXP_PTRN_HTTP_REQ_FIRST "^\\([A-Z]*\\) \\([^ ]*\\) \\(HTTP/[0-9.]*\\)"
 extern regexp_t *regexp_http_req_first;
 
 // init all the regulary expression ehp needs

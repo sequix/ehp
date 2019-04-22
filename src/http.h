@@ -5,6 +5,8 @@
 #include <sys/types.h>
 
 typedef map_t http_header_t;
+#define http_header_new() (http_header_t*)map_new(64)
+#define http_header_free(header) map_free((http_header_t*)header)
 int   http_header_insert(http_header_t *header, const char *line);
 char* http_header_get(http_header_t *header, const char *key);
 int   http_header_set(http_header_t *header, const char *key, const char *value);
@@ -43,11 +45,21 @@ typedef struct {
 
 http_req_t *http_req_new(char *raw, size_t len, int clientfd);
 
+void http_req_free(http_req_t *req);
+
+// for now, only Keep-Alive, which means always with Content-Length
 typedef struct {
     http_version_t     version;
     http_status_code_t status;
-    http_header_t      headers;
+    http_header_t*     headers;
+    size_t             len;
     char*              body;
 } http_rsp_t;
+
+http_rsp_t *http_rsp_new(void);
+
+void http_rsp_free(http_rsp_t *rsp);
+
+int http_rsp_write(http_rsp_t *rsp, int fd);
 
 typedef int (*http_handler_t)(const http_req_t *request, http_rsp_t *response);

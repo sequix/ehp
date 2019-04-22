@@ -12,7 +12,7 @@ set (log_file ehp.log)
 set (default_log_file ehp.log)
 
 project (${project_name})
-add_compile_options(-std=c99)
+add_compile_options(-std=gnu99)
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 

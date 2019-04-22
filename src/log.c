@@ -30,25 +30,28 @@ void log_init(const char *log_file)
 }
 
 static void log_generate(char *s, size_t cap, const char *prefix,
-        bool with_errno, const char *fmt, va_list args)
+        int the_errno, const char *fmt, va_list args)
 {
     int len = 0;
     struct tm t;
     time_t now = time(0);
     localtime_r(&now, &t);
 
-    snprintf(s+len, cap-len, "%04d/%02d/%02d %02d:%02d:%02d", t.tm_year + 1900,
+    snprintf(s+len, cap-len, "%04d/%02d/%02d %02d:%02d:%02d ", t.tm_year + 1900,
         t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
-    len += 19;
+    len += 20;
 
+    int pid = getpid();
+    snprintf(s+len, cap-len, "%d ", pid);
+    len += strlen(s+len);
 
     if (prefix != NULL && *prefix != '\0') {
-        snprintf(s+len, cap-len, " %s ", prefix);
+        snprintf(s+len, cap-len, "%s ", prefix);
         len += strlen(s+len);
     }
 
-    if (with_errno) {
-        strerror_r(errno, s+len, cap-len);
+    if (the_errno != 0) {
+        strerror_r(the_errno, s+len, cap-len);
         len += strlen(s+len);
         snprintf(s+len, cap-len, ": ");
         len += 2;
@@ -119,7 +122,7 @@ void log_error(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     char buf[LOG_MAXLINE];
-    log_generate(buf, LOG_MAXLINE, "ERROR", true, fmt, args);
+    log_generate(buf, LOG_MAXLINE, "ERROR", errno, fmt, args);
     log_to_stderr(buf);
     log_to_file(buf);
     va_end(args);
@@ -130,7 +133,7 @@ void log_debug(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
     char buf[LOG_MAXLINE];
-    log_generate(buf, LOG_MAXLINE, "DEBUG", true, fmt, args);
+    log_generate(buf, LOG_MAXLINE, "DEBUG", errno, fmt, args);
     log_to_stderr(buf);
     log_to_file(buf);
     va_end(args);

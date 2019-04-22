@@ -82,12 +82,3 @@ char *str_copy_n(const char *s, size_t n)
     sp[n] = '\0';
     return sp;
 }
-
-int fd_set_nonblocking(int fd)
-{
-    int flags = fcntl(fd, F_GETFL, 0);
-    if (flags == -1) {
-        return -1;
-    }
-    return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-}

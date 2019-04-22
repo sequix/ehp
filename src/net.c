@@ -1,5 +1,6 @@
 #include "net.h"
 #include "util.h"
+#include "file.h"
 #include <stdio.h>
 #include <errno.h>
 #include <sys/socket.h>
@@ -19,7 +20,7 @@ int tcp_new_server(const char *ip, int port, int backlog)
     if (bind(sockfd, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
         return -1;
     }
-    fd_set_nonblocking(sockfd);
+    file_set_nonblock(sockfd);
     listen(sockfd, backlog);
     return sockfd;
 }

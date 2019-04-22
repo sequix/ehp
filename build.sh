@@ -18,5 +18,6 @@ case ${1:-debug} in
         ;;
     clean)
         rm -rf $BUILD_DIR
+        rm -f "$CUR_DIR/config-example"
         ;;
 esac
