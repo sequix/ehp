@@ -16,4 +16,4 @@ $ ./build.sh clean
 
 ## Where did you get the test site in /root?
 
-Generated with [hugo](https://gohugo.io) and [xianmin/Jane](https://github.com/xianmin/hugo-theme-jane)
+Generated with [hugo](https://gohugo.io) and [xianmin/hugo-theme-jane](https://github.com/xianmin/hugo-theme-jane)
