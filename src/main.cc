@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
 
     char buf[128];
     char path[8192];
-    char *www_root = config_get(CONFIG_WWW_ROOT);
-    int www_root_len = strlen(www_root);
-    strcpy(path, www_root);
+    str_t *www_root = config_get(CONFIG_WWW_ROOT);
+    int www_root_len = www_root->len;
+    strcpy(path, www_root->s);
 
     while (1) {
         http_req_t *req = poller_wait(plr);
@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
             log_debug("file_read wrong");
             rsp->status = 404;
             http_rsp_write(rsp, req->clientfd);
-            http_rsp_free(rsp);
             log_debug("wrote 404 response");
             continue;
         }
@@ -80,8 +79,6 @@ int main(int argc, char *argv[])
         rsp->status = 200;
         rsp->body = rsp_body;
         http_rsp_write(rsp, req->clientfd);
-        http_rsp_free(rsp);
-        free(rsp_body);
         log_debug("wrote 200 response");
     }
 }

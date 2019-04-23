@@ -4,11 +4,20 @@
 
 ehp is a HTTP server, which also is my graduation design.
 
-## How to compile?
+## How to develop?
 
 ```bash
-# This will generate directory '_output', within which is the binary '_output/ehp'
+# First, you need make sure you have following package on your system:
+gc-devel
+gtest-devel
+
+# debug the server with following commands:
+$ source switch.sh
 $ ./build.sh
+$ ehp-test
+
+# run tests with following command
+$ ./build.sh test
 
 # Clean _output and so on, with:
 $ ./build.sh clean

@@ -29,5 +29,6 @@ extern config_t *config;
 
 config_t *config_init(const char *filename);
 
-#define config_get(key) map_get((config)->props, (key))
-#define config_get_int(key) atoi(map_get((config)->props, (key)))
+int config_get_int(const char *key);
+
+#define config_get(key) map_get_c((config)->props, (key))

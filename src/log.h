@@ -1,7 +1,9 @@
 #pragma once
 
+#include "str.h"
+
 // given NULL, use DEFAULT_LOG_FILE in config.h
-void log_init(const char *log_file);
+void log_init(const str_t *log_file);
 
 // write log to stdout and file, with prefix INFO
 void log_info(const char *fmt, ...);

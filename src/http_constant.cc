@@ -1,4 +1,5 @@
 #include "http.h"
+#include <stdlib.h>
 
 // HTTP Status Code
 static const char *http_status_msg_1xx[] = {

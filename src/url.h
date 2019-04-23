@@ -15,6 +15,6 @@ typedef struct {
     char*  fragment;
 } url_t;
 
-url_t *url_parse(const char *s);
+url_t *url_parse(char *s);
 
 void url_free(url_t *url);

@@ -11,7 +11,6 @@ static url_t *url_new(void)
     }
     url->query = map_new(64);
     if (url->query == NULL) {
-        free(url);
         return NULL;
     }
     url->path = NULL;
@@ -36,12 +35,12 @@ static void url_parse_query(url_t *url, char *s, int left, int right)
 
         char *key = &s[i];
         char *value = &s[pequal + 1];
-        map_set(url->query, key, value);
+        map_set_c(url->query, key, value);
         i = psep + 1;
     }
 }
 
-url_t *url_parse(const char *s)
+url_t *url_parse(char *s)
 {
     // 4 sub parts: entire url, path, raw_query, fragment
     regexp_submatch_t mat[4];
@@ -59,7 +58,6 @@ url_t *url_parse(const char *s)
     int path_len = mat[1].rm_eo - mat[1].rm_so + 1;
     url->path = str_copy_n(s + mat[1].rm_so, path_len);
     if (url->path == NULL) {
-        url_free(url);
         return NULL;
     }
 
@@ -73,14 +71,12 @@ url_t *url_parse(const char *s)
             int query_len = mat[i].rm_eo - mat[i].rm_so + 1;
             url->fragment = str_copy_n(s+mat[i].rm_so, query_len);
             if (url->fragment == NULL) {
-                url_free(url);
                 return NULL;
             }
         } else if (s[so] == '#') {
             int frag_len = mat[i].rm_eo - mat[i].rm_so + 1;
             url->fragment = str_copy_n(s+mat[i].rm_so, frag_len);
             if (url->fragment == NULL) {
-                url_free(url);
                 return NULL;
             }
         } else {
@@ -88,13 +84,4 @@ url_t *url_parse(const char *s)
         }
     }
     return url;
-}
-
-void url_free(url_t *url)
-{
-    map_free(url->query);
-    free(url->path);
-    free(url->raw_query);
-    free(url->fragment);
-    free(url);
 }

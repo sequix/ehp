@@ -16,12 +16,13 @@
 
 static int log_fd = -1;
 
-void log_init(const char *log_file)
+void log_init(const str_t *log_file)
 {
-    if (log_file == NULL || *log_file == '\0') {
-        log_file = DEFAULT_LOG_FILE;
+    char *log_filename = log_file->s;
+    if (log_file == NULL || log_file->len == 0) {
+        log_filename = DEFAULT_LOG_FILE;
     }
-    log_fd = open(log_file, O_APPEND | O_CREAT | O_WRONLY, 0644);
+    log_fd = open(log_filename, O_APPEND | O_CREAT | O_WRONLY, 0644);
     if (log_fd < 0) {
         perror("log: init: open()");
         exit(1);

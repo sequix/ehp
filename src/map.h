@@ -1,28 +1,32 @@
 #pragma once
 
-#include <stdlib.h>
+#include "str.h"
+#include "types.h"
 
 typedef unsigned map_hash_t;
 
 typedef struct map_node_t {
     map_hash_t         hash;
-    char              *key;
-    char              *value;
+    str_t             *key;
+    str_t             *value;
     struct map_node_t *next;
 } map_node_t;
 
 typedef struct {
-    size_t       nbuckets;
+    len_t       nbuckets;
     map_node_t **buckets;
 } map_t ;
 
-map_t *map_new(size_t nbuckets);
+map_t *map_new(len_t nbuckets);
 
-void map_free(map_t *map);
+// return 0 on success, negative on failure
+int map_set(map_t *map, const str_t *key, const str_t *value);
 
-int map_set(map_t *map, const char *key, const char *value);
+// return pointer to the value, NULL if no such key
+str_t *map_get(const map_t *map, const str_t *key);
 
-// given "key: value"
-int map_set_from_line(map_t *map, char *s);
-
-char *map_get(const map_t *map, const char *key);
+// syntax candy allowing use c-style string as key and value
+// But, I will not provide function return c-style char*,
+// you should honor str_t.
+#define map_set_c(m,k,v) map_set((m), str_new(k), str_new(v))
+#define map_get_c(m,k) map_get((m), str_new(k))

@@ -80,7 +80,7 @@ config_t *config_init(const char *filename)
         }
 
         // a kv property
-        if (map_set(config->props, key, value) < 0) {
+        if (map_set_c(config->props, key, value) < 0) {
             log_error("config: map set");
             exit(1);
             continue;
@@ -88,4 +88,14 @@ config_t *config_init(const char *filename)
     }
     fclose(f);
     return config;
+}
+
+int config_get_int(const char *key)
+{
+    str_t *s = map_get_c(config->props, key);
+    if (s == NULL) {
+        log_warn("config_get_int_c: no such config key '%s'", key);
+        return 0;
+    }
+    return atoi(s->s);
 }

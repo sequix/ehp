@@ -94,12 +94,6 @@ http_rsp_t *http_rsp_new(void)
     return rsp;
 }
 
-void http_rsp_free(http_rsp_t *rsp)
-{
-    http_header_free(rsp->headers);
-    free(rsp);
-}
-
 int http_rsp_write(http_rsp_t *rsp, int fd)
 {
     char buf[1024];
