@@ -24,7 +24,7 @@ static void args_init(void)
 
 void args_print_help(void)
 {
-    printf("Usage: %s", NAME);
+    printf("Usage: %s", PROGNAME);
     arg_print_syntax(stdout, args_table, "\n");
     printf("\nA HTTP server for graduation design by zc.\n\n");
     printf("Options:\n");
@@ -33,7 +33,7 @@ void args_print_help(void)
 
 void args_print_version(void)
 {
-    printf("%s: v%d.%d.%d\n", NAME, VERSION_MAJOR, VERSION_MINOR,
+    printf("%s: v%d.%d.%d\n", PROGNAME, VERSION_MAJOR, VERSION_MINOR,
         VERSION_PATCH);
 }
 
@@ -53,10 +53,11 @@ int args_handle(int argc, char *argv[])
     }
 
     if (nerrors > 0) {
-        arg_print_errors(stdout, args_err, NAME);
-        printf("Try '%s --help' for more information.\n", NAME);
+        arg_print_errors(stdout, args_err, PROGNAME);
+        printf("Try '%s --help' for more information.\n", PROGNAME);
         exit(1);
     }
 
     // TODO: free table (will freeing make args_config_file broken?)
+    return 0;
 }

@@ -5,9 +5,12 @@ set (project_name ehp)
 set (version_major 1)
 set (version_minor 0)
 set (version_patch 0)
-set (www_root root)
-set (log_file ehp.log)
-set (default_log_file ehp.log)
+set (config_www_root root)
+set (config_log_file ehp.log)
+set (config_default_log_file ehp.log)
+set (pconfig_hash_seed 42)
+
+set (global_libraries m gc cord)
 
 project (${project_name})
 set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -DDEBUG")
@@ -24,16 +27,21 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/config-example"
 )
 
-# source files
-aux_source_directory (src src_objs)
-add_executable (${project_name} ${src_objs})
-target_link_libraries (${project_name} m gc)
+# Debug & Release building
+if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Test")
+    # source files
+    aux_source_directory (src src_objs)
+    add_executable (${project_name} ${src_objs})
+    target_link_libraries (${project_name} ${global_libraries})
 
-# external package - argtable3
-add_subdirectory ("${PROJECT_SOURCE_DIR}/pkg/argtable3")
-include_directories ("${PROJECT_SOURCE_DIR}/pkg/argtable3")
-target_link_libraries (${project_name} argtable3)
+    # external package - argtable3
+    add_subdirectory ("${PROJECT_SOURCE_DIR}/pkg/argtable3")
+    include_directories ("${PROJECT_SOURCE_DIR}/pkg/argtable3")
+    target_link_libraries (${project_name} argtable3)
+endif()
 
-# testing
-enable_testing()
-add_subdirectory ("${PROJECT_SOURCE_DIR}/test")
+# Tests building
+if(${CMAKE_BUILD_TYPE} STREQUAL "Test")
+    enable_testing()
+    add_subdirectory ("${PROJECT_SOURCE_DIR}/test")
+endif()

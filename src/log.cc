@@ -1,141 +1,128 @@
 #include "log.h"
+#include "str.h"
+#include "ptime.h"
+#include "config.h"
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <stdarg.h>
-#include <time.h>
-#include "config.h"
-
-// TODO: remove this length limit of log
-// maximum length of each log
-#define LOG_MAXLINE 8192
 
 static int log_fd = -1;
 
-void log_init(const str_t *log_file)
+void log_init(str_t log_file)
 {
-    char *log_filename = log_file->s;
-    if (log_file == NULL || log_file->len == 0) {
-        log_filename = DEFAULT_LOG_FILE;
+    if (log_file == NULL) {
+        log_file = DEFAULT_LOG_FILE;
     }
-    log_fd = open(log_filename, O_APPEND | O_CREAT | O_WRONLY, 0644);
+    log_fd = open(str_tocc(log_file), O_APPEND | O_CREAT | O_WRONLY, 0644);
     if (log_fd < 0) {
-        perror("log: init: open()");
+        perror(str_tocc(log_file));
         exit(1);
     }
     log_info("log: init success");
 }
 
-static void log_generate(char *s, size_t cap, const char *prefix,
-        int the_errno, const char *fmt, va_list args)
+static str_t log_generate(str_t prefix, int the_errno, str_t fmt, va_list args)
 {
-    int len = 0;
-    struct tm t;
-    time_t now = time(0);
-    localtime_r(&now, &t);
+    char buf[64];
 
-    snprintf(s+len, cap-len, "%04d/%02d/%02d %02d:%02d:%02d ", t.tm_year + 1900,
-        t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
-    len += 20;
+    ptime_t pt = ptime();
+    str_t l_time = STR_EMPTY;
+    str_sprintf(&l_time, "%04d/%02d/%02d %02d:%02d:%02d.%03ld ", pt->year,
+        pt->month, pt->day, pt->hour, pt->minute, pt->second, pt->millisecond);
 
-    int pid = getpid();
-    snprintf(s+len, cap-len, "%d ", pid);
-    len += strlen(s+len);
+    str_t l_pid = STR_EMPTY;
+    str_sprintf(&l_pid, "%d ", getpid());
 
-    if (prefix != NULL && *prefix != '\0') {
-        snprintf(s+len, cap-len, "%s ", prefix);
-        len += strlen(s+len);
+    str_t l_prefix = STR_EMPTY;
+    if (str_len(prefix) > 0) {
+        l_prefix = str_catc(prefix, ' ');
     }
 
+    str_t l_errno = STR_EMPTY;
     if (the_errno != 0) {
-        strerror_r(the_errno, s+len, cap-len);
-        len += strlen(s+len);
-        snprintf(s+len, cap-len, ": ");
-        len += 2;
+        strerror_r(the_errno, buf, sizeof(buf));
+        str_sprintf(&l_errno, "%s: ", buf);
     }
 
-    vsnprintf(s+len, cap-len, fmt, args);
-    len += strlen(s+len);
-    snprintf(s+len, cap-len, "\n");
+    str_t l_msg = STR_EMPTY;
+    str_vsprintf(&l_msg, fmt, args);
+    l_msg = str_catc(l_msg, '\n');
+    return str_catn(5, l_time, l_pid, l_prefix, l_errno, l_msg);
 }
 
-static int log_to_file(const char *msg)
+static int log_to_file(str_t msg)
 {
-    int len = strlen(msg);
+    int len = str_len(msg);
 
-    if (write(log_fd, msg, len) != len) {
+    if (write(log_fd, str_tocc(msg), len) != len) {
         perror("log to file");
         return -1;
     }
     return 0;
 }
 
-static int log_to_stdout(const char *msg)
+static int log_to_stdout(str_t msg)
 {
-    int len = strlen(msg);
+    int len = str_len(msg);
 
-    if (write(STDOUT_FILENO, msg, len) != len) {
+    if (write(STDOUT_FILENO, str_tocc(msg), len) != len) {
         perror("log to stdout");
         return -1;
     }
     return 0;
 }
 
-static int log_to_stderr(const char *msg)
+static int log_to_stderr(str_t msg)
 {
-    int len = strlen(msg);
+    int len = str_len(msg);
 
-    if (write(STDERR_FILENO, msg, len) != len) {
+    if (write(STDERR_FILENO, str_tocc(msg), len) != len) {
         perror("log to stderr");
         return -1;
     }
     return 0;
 }
 
-void log_info(const char *fmt, ...)
+void log_info(str_t fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    char buf[LOG_MAXLINE];
-    log_generate(buf, LOG_MAXLINE, "INFO", false, fmt, args);
-    log_to_stdout(buf);
-    log_to_file(buf);
+    str_t log = log_generate("INFO", 0, fmt, args);
+    log_to_stdout(log);
+    log_to_file(log);
     va_end(args);
 }
 
-void log_warn(const char *fmt, ...)
+void log_warn(str_t fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    char buf[LOG_MAXLINE];
-    log_generate(buf, LOG_MAXLINE, "WARN", false, fmt, args);
-    log_to_stdout(buf);
-    log_to_file(buf);
+    str_t log = log_generate("WARN", 0, fmt, args);
+    log_to_stdout(log);
+    log_to_file(log);
     va_end(args);
 }
 
-void log_error(const char *fmt, ...)
+void log_error(str_t fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    char buf[LOG_MAXLINE];
-    log_generate(buf, LOG_MAXLINE, "ERROR", errno, fmt, args);
-    log_to_stderr(buf);
-    log_to_file(buf);
+    str_t log = log_generate("ERROR", errno, fmt, args);
+    log_to_stderr(log);
+    log_to_file(log);
     va_end(args);
 }
 
-void log_debug(const char *fmt, ...)
+void log_debug(str_t fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    char buf[LOG_MAXLINE];
-    log_generate(buf, LOG_MAXLINE, "DEBUG", errno, fmt, args);
-    log_to_stderr(buf);
-    log_to_file(buf);
+    str_t log = log_generate("DEBUG", errno, fmt, args);
+    log_to_stdout(log);
+    log_to_file(log);
     va_end(args);
 }

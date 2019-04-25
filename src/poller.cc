@@ -1,8 +1,6 @@
 #include "poller.h"
-#include "file.h"
 #include "log.h"
 #include "util.h"
-#include "http.h"
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdbool.h>
@@ -10,7 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-poller_t *poller_new(int listenfd, size_t cap, int timeout)
+poller_t poller_new(int listenfd, len_t cap, int timeout)
 {
     int epollfd = epoll_create(cap);
     if (epollfd < 0) {
@@ -25,7 +23,7 @@ poller_t *poller_new(int listenfd, size_t cap, int timeout)
         return NULL;
     }
 
-    poller_t *plr = (poller_t*)malloc(sizeof(poller_t));
+    poller_t plr = talloc(poller_st);
     if (plr == NULL) {
         close(epollfd);
         return NULL;

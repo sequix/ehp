@@ -1,6 +1,6 @@
 #pragma once
 
-#include "http.h"
+#include "types.h"
 #include <sys/epoll.h>
 
 typedef struct {
@@ -21,8 +21,10 @@ typedef struct {
 
     // events epoll returned
     struct epoll_event *events;
-} poller_t;
+} poller_st;
 
-poller_t *poller_new(int listenfd, size_t cap, int timeout);
+typedef poller_st* poller_t;
 
-http_req_t *poller_wait(poller_t *plr);
+poller_t poller_new(int listenfd, len_t cap, int timeout);
+
+http_req_t poller_wait(poller_t *plr);

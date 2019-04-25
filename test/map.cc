@@ -1,11 +1,19 @@
 #include "map.h"
-#include "mem.h"
+#include "map.h"
 #include <gtest/gtest.h>
 
-TEST(array_t, basic)
+TEST(map_t, basic)
 {
-    map_t *map = map_new(32);
-    EXPECT_EQ(32, map->nbuckets);
+    int nb = 32;
+    map_t map = map_new(nb);
+    EXPECT_EQ(nb, map->nbuckets);
 
-    map_set_c(map, "k1", "v1");
+    map_set(map, "k1", "v1");
+    EXPECT_STREQ("v1", map_get(map, "k1"));
+
+    map_set(map, "k1", "v11");
+    EXPECT_STREQ("v11", map_get(map, "k1"));
+    
+    map_set(map, "k2", "v2");
+    EXPECT_STREQ("v2", map_get(map, "k2"));
 }

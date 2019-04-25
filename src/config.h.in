@@ -1,11 +1,11 @@
 #pragma once
 
-#define NAME "@project_name@"
+#define PROGNAME "@project_name@"
 
 #define VERSION_MAJOR @version_major@
 #define VERSION_MINOR @version_minor@
 #define VERSION_PATCH @version_patch@
-#define DEFAULT_LOG_FILE "@default_log_file@"
+#define DEFAULT_LOG_FILE "@config_default_log_file@"
 
 #define CONFIG_ADDRESS  "address"
 #define CONFIG_PORT     "port"
@@ -14,21 +14,28 @@
 #define CONFIG_LOG_FILE "log_file"
 #define CONFIG_WWW_ROOT "www_root"
 
+#define HASH_SEED @pconfig_hash_seed@
+
 #include "map.h"
 #include "array.h"
+#include <stdlib.h>
 
 typedef struct {
     // store all configurations but 'route' as KV pairs
-    map_t *props;
+    map_t props;
 
     // store all route as an arry, which will be used to build a radix tree
-    array_t *routes;
-} config_t;
+    array_t routes;
+} config_st;
 
-extern config_t *config;
+typedef config_st* config_t;
 
-config_t *config_init(const char *filename);
+// the global config
+extern config_t config;
 
-int config_get_int(const char *key);
+int config_init(str_t filename);
 
-#define config_get(key) map_get_c((config)->props, (key))
+#define config_get(k)     map_get(config->props,(k))
+#define config_get_int(k) atoi(str_tocc(map_get(config->props,(k))))
+
+// TODO: default config

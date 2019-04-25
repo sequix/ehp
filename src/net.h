@@ -2,4 +2,4 @@
 
 #include "str.h"
 
-int tcp_new_server(const str_t *ip, int port, int backlog);
+int tcp_new_listenfd(str_t ip, int port, int backlog);

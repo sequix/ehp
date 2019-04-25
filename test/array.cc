@@ -4,10 +4,11 @@
 
 TEST(array_t, basic)
 {
-    array_t *arr = array_new();
-    EXPECT_EQ(ARRAY_INIT_CAPACITY, arr->cap);
+    len_t init_cap = 5;
+    array_t arr = array_new(init_cap);
+    EXPECT_EQ(init_cap, arr->cap);
 
-    int n = ARRAY_INIT_CAPACITY * 3;
+    int n = init_cap * 3;
 
     for (int i = 1; i <= n; ++i) {
         int *p = talloc(int);
@@ -16,10 +17,14 @@ TEST(array_t, basic)
     }
 
     EXPECT_EQ(n, arr->len);
-    EXPECT_EQ(ARRAY_INIT_CAPACITY << 2, arr->cap);
+    EXPECT_EQ(init_cap << 2, arr->cap);
 
     int **pa = (int**)arr->array;
     for (int i = 1; i <= n; ++i) {
         EXPECT_EQ(i, *pa[i-1]);
+    }
+
+    for (int i = 1; i <= n; ++i) {
+        EXPECT_EQ(i, array_get_int(arr, i-1));
     }
 }
