@@ -1,0 +1,9 @@
+# this is comment, no support for comment within a line
+address: 0.0.0.0
+port: 8080
+worker: 2
+backlog: 32
+timeout: 60
+log_file: /home/squix/code/http/ehp-dev/log
+www_root: /home/squix/code/http/ehp-dev/root
+

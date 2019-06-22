@@ -1,207 +1,206 @@
 #include "str.h"
 #include <gtest/gtest.h>
 
-TEST(str_t, new)
-{
-    const char *expected = "hello";
-    str_t *s = str_new(expected);
-    EXPECT_EQ(5, s->len);
-    EXPECT_STREQ(expected, s->s);
-
-    s = str_new("");
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
-}
-
-TEST(str_t, new_n)
-{
-    const char *expected = "hello";
-    str_t *s = str_new_n(expected, 3);
-    EXPECT_STREQ("hel", s->s);
-
-    s = str_new_n("123", 0);
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
-}
+// TODO: table test & customized equality
 
 TEST(str_t, trim)
 {
     // NULL
-    str_t *s = str_trim(NULL);
-    EXPECT_EQ(NULL, s);
+    str_t s = str_trim(NULL);
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_EQ(STR_EMPTY, s);
 
     // empty string
-    s = str_trim(str_new(""));
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
+    s = str_trim(STR_EMPTY);
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_EQ(STR_EMPTY, s);
+
+    // WARN: NEVER use "" for CORD, use STR_EMPTY instead
+    s = str_trim(str_from(""));
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_STREQ(STR_EMPTY, s);
 
     // all spaces
-    s = str_trim(str_new(" \t \r \n "));
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
+    s = str_trim(" \t \r \n ");
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_STREQ(STR_EMPTY, s);
 
     // only left
-    s = str_trim(str_new(" \t\r\nehp"));
-    EXPECT_EQ(3, s->len);
-    EXPECT_STREQ("ehp", s->s);
+    s = str_trim(" \t\r\nehp");
+    EXPECT_EQ(3, str_len(s));
+    EXPECT_STREQ("ehp", s);
 
     // only right
-    s = str_trim(str_new("ehp\n \t\r"));
-    EXPECT_EQ(3, s->len);
-    EXPECT_STREQ("ehp", s->s);
+    s = str_trim("ehp\n \t\r");
+    EXPECT_EQ(3, str_len(s));
+    EXPECT_STREQ("ehp", s);
 
     // both side
-    s = str_trim(str_new(" \n\t\r  ehp\n \t\r"));
-    EXPECT_EQ(3, s->len);
-    EXPECT_STREQ("ehp", s->s);
+    s = str_trim(" \n\t\r  ehp\n \t\r");
+    EXPECT_EQ(3, str_len(s));
+    EXPECT_STREQ("ehp", s);
 }
 
 TEST(str_t, trim_left)
 {
     // NULL
-    str_t *s = str_trim_left(NULL);
+    str_t s = str_ltrim(NULL);
+    EXPECT_EQ(0, str_len(s));
     EXPECT_EQ(NULL, s);
 
     // empty string
-    s = str_trim_left(str_new(""));
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
+    s = str_ltrim(STR_EMPTY);
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_EQ(STR_EMPTY, s);
+
+    // empty string
+    s = str_ltrim(str_from(""));
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_STREQ(STR_EMPTY, s);
 
     // all spaces
-    s = str_trim_left(str_new(" \t \r \n "));
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
+    s = str_ltrim(str_from(" \t \r \n "));
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_STREQ(STR_EMPTY, s);
 
     // only left
-    s = str_trim_left(str_new(" \t\r\nehp"));
-    EXPECT_EQ(3, s->len);
-    EXPECT_STREQ("ehp", s->s);
+    s = str_ltrim(str_from(" \t\r\nehp"));
+    EXPECT_EQ(3, str_len(s));
+    EXPECT_STREQ("ehp", s);
 
     // only right
-    s = str_trim_left(str_new("ehp\n \t\r"));
-    EXPECT_EQ(7, s->len);
-    EXPECT_STREQ("ehp\n \t\r", s->s);
+    s = str_ltrim(str_from("ehp\n \t\r"));
+    EXPECT_EQ(7, str_len(s));
+    EXPECT_STREQ("ehp\n \t\r", s);
 
     // both side
-    s = str_trim_left(str_new(" \n\t\r  ehp\n \t\r"));
-    EXPECT_EQ(7, s->len);
-    EXPECT_STREQ("ehp\n \t\r", s->s);
+    s = str_ltrim(str_from(" \n\t\r  ehp\n \t\r"));
+    EXPECT_EQ(7, str_len(s));
+    EXPECT_STREQ("ehp\n \t\r", s);
 }
 
 TEST(str_t, trim_right)
 {
     // NULL
-    str_t *s = str_trim_right(NULL);
+    str_t s = str_rtrim(NULL);
+    EXPECT_EQ(0, str_len(s));
     EXPECT_EQ(NULL, s);
 
     // empty string
-    s = str_trim_right(str_new(""));
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
+    s = str_ltrim(STR_EMPTY);
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_EQ(STR_EMPTY, s);
+
+    // empty string
+    s = str_rtrim(str_from(""));
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_STREQ(STR_EMPTY, s);
 
     // all spaces
-    s = str_trim_right(str_new(" \t \r \n "));
-    EXPECT_EQ(0, s->len);
-    EXPECT_STREQ("", s->s);
+    s = str_rtrim(str_from(" \t \r \n "));
+    EXPECT_EQ(0, str_len(s));
+    EXPECT_STREQ(STR_EMPTY, s);
 
     // only right
-    s = str_trim_right(str_new(" \t\r\nehp"));
-    EXPECT_EQ(7, s->len);
-    EXPECT_STREQ(" \t\r\nehp", s->s);
+    s = str_rtrim(str_from(" \t\r\nehp"));
+    EXPECT_EQ(7, str_len(s));
+    EXPECT_STREQ(" \t\r\nehp", s);
 
     // only right
-    s = str_trim_right(str_new("ehp\n \t\r"));
-    EXPECT_EQ(3, s->len);
-    EXPECT_STREQ("ehp", s->s);
+    s = str_rtrim(str_from("ehp\n \t\r"));
+    EXPECT_EQ(3, str_len(s));
+    EXPECT_STREQ("ehp", s);
 
     // both side
-    s = str_trim_right(str_new(" \n\t\r  ehp\n \t\r"));
-    EXPECT_EQ(9, s->len);
-    EXPECT_STREQ(" \n\t\r  ehp", s->s);
+    s = str_rtrim(str_from(" \n\t\r  ehp\n \t\r"));
+    EXPECT_EQ(9, str_len(s));
+    EXPECT_STREQ(" \n\t\r  ehp", s);
 }
 
 TEST(str_t, split)
 {
+    array_t arr;
+
     // NULL
-    array_t *arr = str_split_n(NULL, 0, -1);
+    arr = str_nsplit(NULL, 0, -1);
     EXPECT_EQ(NULL, arr);
 
     // split zero
-    arr = str_split_n(str_new("aaa:bb:c"), ':', 0);
+    arr = str_nsplit(str_from("aaa:bb:c"), ':', 0);
     EXPECT_EQ(0, arr->len);
 
     // split one
-    arr = str_split_n(str_new("aaa:bb:c"), ':', 1);
+    arr = str_nsplit(str_from("aaa:bb:c"), ':', 1);
     EXPECT_EQ(1, arr->len);
-    EXPECT_STREQ("aaa:bb:c", ((str_t*)arr->array[0])->s);
+    EXPECT_STREQ("aaa:bb:c", array_get_(str_t, arr, 0));
 
     // split two
-    arr = str_split_n(str_new("aaa:bb:c"), ':', 2);
+    arr = str_nsplit(str_from("aaa:bb:c"), ':', 2);
     EXPECT_EQ(2, arr->len);
-    EXPECT_STREQ("aaa", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("bb:c", ((str_t*)(char*)arr->array[1])->s);
+    EXPECT_STREQ("aaa", array_get_(str_t, arr, 0));
+    EXPECT_STREQ("bb:c", array_get_(str_t, arr, 1));
 
     // split three
-    arr = str_split_n(str_new("aaa:bb:c"), ':', 3);
+    arr = str_nsplit(str_from("aaa:bb:c"), ':', 3);
     EXPECT_EQ(3, arr->len);
-    EXPECT_STREQ("aaa", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("bb", ((str_t*)(char*)arr->array[1])->s);
-    EXPECT_STREQ("c", ((str_t*)(char*)arr->array[2])->s);
+    EXPECT_STREQ("aaa", array_get_(str_t, arr, 0));
+    EXPECT_STREQ("bb", array_get_(str_t, arr, 1));
+    EXPECT_STREQ("c", array_get_(str_t, arr, 2));
 
     // split more
-    arr = str_split_n(str_new("aaa:bb:c"), ':', 10);
+    arr = str_nsplit(str_from("aaa:bb:c"), ':', 10);
     EXPECT_EQ(3, arr->len);
-    EXPECT_STREQ("aaa", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("bb", ((str_t*)(char*)arr->array[1])->s);
-    EXPECT_STREQ("c", ((str_t*)(char*)arr->array[2])->s);
+    EXPECT_STREQ("aaa", array_get_(str_t, arr, 0));
+    EXPECT_STREQ("bb", array_get_(str_t, arr, 1));
+    EXPECT_STREQ("c", array_get_(str_t, arr, 2));
 
     // split all
-    arr = str_split_n(str_new("aaa:bb:c"), ':', -1);
+    arr = str_nsplit(str_from("aaa:bb:c"), ':', -1);
     EXPECT_EQ(3, arr->len);
-    EXPECT_STREQ("aaa", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("bb", ((str_t*)(char*)arr->array[1])->s);
-    EXPECT_STREQ("c", ((str_t*)(char*)arr->array[2])->s);
+    EXPECT_STREQ("aaa", array_get_(str_t, arr, 0));
+    EXPECT_STREQ("bb", array_get_(str_t, arr, 1));
+    EXPECT_STREQ("c", array_get_(str_t, arr, 2));
 
     // special
-    arr = str_split_n(str_new(":"), ':', -1);
+    arr = str_nsplit(str_from(":"), ':', -1);
     EXPECT_EQ(2, arr->len);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[1])->s);
+    EXPECT_EQ(STR_EMPTY, array_get_(str_t, arr, 0));
+    EXPECT_EQ(STR_EMPTY, array_get_(str_t, arr, 1));
 
     // special
-    arr = str_split_n(str_new(":"), ':', 1);
+    arr = str_nsplit(str_from(":"), ':', 1);
     EXPECT_EQ(1, arr->len);
-    EXPECT_STREQ(":", ((str_t*)(char*)arr->array[0])->s);
+    EXPECT_STREQ(":", array_get_(str_t, arr, 0));
 
     // special
-    arr = str_split_n(str_new("::"), ':', -1);
+    arr = str_nsplit(str_from("::"), ':', -1);
     EXPECT_EQ(3, arr->len);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[1])->s);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[2])->s);
+    EXPECT_STREQ(STR_EMPTY, array_get_(str_t, arr, 0));
+    EXPECT_STREQ(STR_EMPTY, array_get_(str_t, arr, 1));
+    EXPECT_STREQ(STR_EMPTY, array_get_(str_t, arr, 2));
 
     // special
-    arr = str_split_n(str_new("::"), ':', 1);
+    arr = str_nsplit(str_from("::"), ':', 1);
     EXPECT_EQ(1, arr->len);
-    EXPECT_STREQ("::", ((str_t*)(char*)arr->array[0])->s);
+    EXPECT_STREQ("::", array_get_(str_t, arr, 0));
 
     // special
-    arr = str_split_n(str_new("::"), ':', 2);
+    arr = str_nsplit(str_from("::"), ':', 2);
     EXPECT_EQ(2, arr->len);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ(":", ((str_t*)(char*)arr->array[1])->s);
+    EXPECT_STREQ(STR_EMPTY, array_get_(str_t, arr, 0));
+    EXPECT_STREQ(":", array_get_(str_t, arr, 1));
 
     // special
-    arr = str_split_n(str_new("aaa::b"), ':', -1);
+    arr = str_nsplit(str_from("aaa::b"), ':', -1);
     EXPECT_EQ(3, arr->len);
-    EXPECT_STREQ("aaa", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[1])->s);
-    EXPECT_STREQ("b", ((str_t*)(char*)arr->array[2])->s);
+    EXPECT_STREQ("aaa", array_get_(str_t, arr, 0));
+    EXPECT_STREQ(STR_EMPTY, array_get_(str_t, arr, 1));
+    EXPECT_STREQ("b", array_get_(str_t, arr, 2));
 
     // special
-    arr = str_split_n(str_new("aaa::"), ':', -1);
+    arr = str_nsplit(str_from("aaa::"), ':', -1);
     EXPECT_EQ(3, arr->len);
-    EXPECT_STREQ("aaa", ((str_t*)(char*)arr->array[0])->s);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[1])->s);
-    EXPECT_STREQ("", ((str_t*)(char*)arr->array[1])->s);
+    EXPECT_STREQ("aaa", array_get_(str_t, arr, 0));
+    EXPECT_STREQ(STR_EMPTY, array_get_(str_t, arr, 1));
+    EXPECT_STREQ(STR_EMPTY, array_get_(str_t, arr, 2));
 }

@@ -5,7 +5,7 @@
 #include <sys/types.h>
 
 typedef map_t http_header_t;
-#define http_header_new() (http_header_t*)map_new(64)
+#define http_header_new() (http_header_t)map_new(64)
 int   http_header_insert(http_header_t *header, const char *line);
 char* http_header_get(http_header_t *header, const char *key);
 int   http_header_set(http_header_t *header, const char *key, const char *value);
@@ -24,41 +24,40 @@ extern http_method_t HTTP_METHOD_CONNECT;
 extern http_method_t HTTP_METHOD_TRACE;
 extern http_method_t HTTP_METHOD_OPTIONS;
 
-typedef const char *http_version_t;
+typedef const char*   http_version_t;
 extern http_version_t HTTP_VERSION_1_0;
 extern http_version_t HTTP_VERSION_1_1;
 extern http_version_t HTTP_VERSION_2;
 
 typedef struct {
-    // TODO: remote-end ip
-    int            clientfd;
+    str_t          remote_addr;
     http_method_t  method;
-    url_t*         addr;
+    url_t          addr;
     http_version_t version;
-    http_header_t* headers;
-    size_t         body_len;
-    char*          body;
-    size_t         raw_len;
+    http_header_t  headers;
+    len_t          raw_len;
     char*          raw;
-} http_req_t;
+} http_req_st;
 
-http_req_t *http_req_new(char *raw, size_t len, int clientfd);
+typedef http_req_st* http_req_t;
 
-void http_req_free(http_req_t *req);
+http_req_t http_req_new(char *raw, len_t len, int fd);
+
+void http_req_free(http_req_t req);
 
 // for now, only Keep-Alive, which means always with Content-Length
 typedef struct {
     http_version_t     version;
     http_status_code_t status;
-    http_header_t*     headers;
-    size_t             len;
-    char*              body;
-} http_rsp_t;
+    http_header_t      headers;
+    len_t              len;
+    int                bodyfd;
+} http_rsp_st;
 
-http_rsp_t *http_rsp_new(void);
+typedef http_rsp_st* http_rsp_t;
 
-void http_rsp_free(http_rsp_t *rsp);
+http_rsp_t http_rsp_from_file(str_t filepath);
 
-int http_rsp_write(http_rsp_t *rsp, int fd);
+int http_rsp_write(http_rsp_t rsp, int fd);
 
-typedef int (*http_handler_t)(const http_req_t *request, http_rsp_t *response);
+typedef int (*http_handler_t)(const http_req_t request, http_rsp_t response);

@@ -1,39 +1,46 @@
 cmake_minimum_required (VERSION 2.8)
 
-# configs
+# Configs
 set (project_name ehp)
-set (version_major 1)
+set (version_major 2)
 set (version_minor 0)
 set (version_patch 0)
-set (www_root root)
-set (log_file ehp.log)
-set (default_log_file ehp.log)
+set (config_default_www_root /www)
+set (config_default_file /etc/ehp.conf)
+set (config_default_log_file /var/log/ehp)
+
+set (global_libraries m gc cord pthread)
 
 project (${project_name})
-set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+set(CMAKE_C_FLAGS_DEBUG "$ENV{CXXFLAGS} -std=gnu99 -O0 -Wall -g -ggdb -DDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "$ENV{CXXFLAGS} -std=gnu99 -O3 -Wall")
 
-# config files
+# Program config files
 configure_file (
   "${PROJECT_SOURCE_DIR}/src/config.h.in"
   "${PROJECT_SOURCE_DIR}/src/config.h"
 )
 
+# Binary config files
 configure_file (
   "${PROJECT_SOURCE_DIR}/config-example.in"
   "${PROJECT_SOURCE_DIR}/config-example"
 )
 
-# source files
-aux_source_directory (src src_objs)
-add_executable (${project_name} ${src_objs})
-target_link_libraries (${project_name} m gc)
+#configure_file (
+#  "${PROJECT_SOURCE_DIR}/config.in"
+#  "${PROJECT_SOURCE_DIR}/config"
+#)
 
-# external package - argtable3
-add_subdirectory ("${PROJECT_SOURCE_DIR}/pkg/argtable3")
-include_directories ("${PROJECT_SOURCE_DIR}/pkg/argtable3")
-target_link_libraries (${project_name} argtable3)
+# Debug & Release building
+if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Test")
+    aux_source_directory (src src_objs)
+    add_executable (${project_name} ${src_objs})
+    target_link_libraries (${project_name} ${global_libraries})
+endif()
 
-# testing
-enable_testing()
-add_subdirectory ("${PROJECT_SOURCE_DIR}/test")
+# Tests building
+if(${CMAKE_BUILD_TYPE} STREQUAL "Test")
+    enable_testing()
+    add_subdirectory ("${PROJECT_SOURCE_DIR}/test")
+endif()

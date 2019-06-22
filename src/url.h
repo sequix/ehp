@@ -9,12 +9,14 @@
 //    raw_query: ?k1=v1&k2=v2
 //    fragment: loc
 typedef struct {
-    char*  path;
-    map_t* query;
-    char*  raw_query;
-    char*  fragment;
-} url_t;
+    map_t query;
+    str_t path;
+    str_t raw_query;
+    str_t fragment;
+} url_st;
 
-url_t *url_parse(char *s);
+typedef url_st* url_t;
 
-void url_free(url_t *url);
+url_t url_parse(str_t s);
+
+void url_free(url_t url);

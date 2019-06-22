@@ -1,15 +1,19 @@
 #pragma once
 
-// TODO: remove argtable, implement yourself
-#include "argtable3.h"
+#include "config.h"
+#include "str.h"
+#include <stdbool.h>
 
-#define args_num 7
-extern  struct   arg_lit  *args_help;
-extern  struct   arg_lit  *args_version;
-extern  struct   arg_lit  *args_verbose;
-extern  struct   arg_lit  *args_daemon;
-extern  struct   arg_file *args_config_file;
-extern  struct   arg_file *args_log_file;
-extern  struct   arg_end  *args_err;
+typedef struct {
+    bool is_daemon;
+    bool is_debug;
+    str_t config;
+} args_st;
 
-int args_handle(int argc, char *argv[]);
+typedef args_st* args_t;
+
+// global arguments
+extern args_t args;
+
+// parse command arguments, if fail print help message and exit
+void args_init(int argc, char *argv[]);

@@ -3,6 +3,7 @@ address: 127.0.0.1
 port: 8080
 worker: 4
 backlog: 32
-log_file: @PROJECT_SOURCE_DIR@/@log_file@
-www_root: @PROJECT_SOURCE_DIR@/@www_root@
-route: GET / @PROJECT_SOURCE_DIR@/@www_root@
+timeout: 10
+log_file: @PROJECT_SOURCE_DIR@/log
+www_root: @PROJECT_SOURCE_DIR@/root
+
