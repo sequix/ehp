@@ -34,6 +34,17 @@ str_t str_trim(str_t str)
     return str_sub(str, first_nonspace, last_nonspace - first_nonspace + 1);
 }
 
+// make a str_t with at most n chars, starts at i
+str_t str_nfrom(const char *s, int i, int n)
+{
+    char *buf = stalloc(n+1, char);
+    if (!buf) {
+        return NULL;
+    }
+    strncpy(buf, s+i, n);
+    return str_from(buf);
+}
+
 // convert integer to str_t
 str_t str_from_int64(int64_t x)
 {

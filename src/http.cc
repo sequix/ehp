@@ -14,17 +14,17 @@
 #include <sys/sendfile.h>
 #include <fcntl.h>
 
-//static char *next_line(char *last_line)
-//{
-//    int i = 0;
-//    while (last_line[i] != '\n') {
-//        ++i;
-//    }
-//    if (last_line[i+1] == '\0') {
-//        return NULL;
-//    }
-//    return &last_line[i+1];
-//}
+static char *next_line(char *last_line)
+{
+    int i = 0;
+    while (last_line[i] != '\n') {
+        ++i;
+    }
+    if (last_line[i+1] == '\0') {
+        return NULL;
+    }
+    return &last_line[i+1];
+}
 
 // 404 page
 http_rsp_t http_rsp_404 = NULL;
@@ -37,39 +37,30 @@ http_req_t http_req_new(char *raw, len_t len, int fd)
         return NULL;
     }
 
-    req->headers = (http_header_t)map_new(64);
-    if (req->headers == NULL) {
-        log_error("http: map_new headers");
-        return NULL;
-    }
-
-    char *line = raw;
+    char *p = strchr(raw, '\r');
+    *p = '\0';
     regexp_submatch_st mat[4];
 
-    if (regexp_match(regexp_http_req_first, line, 4, mat) != 0) {
+    if (regexp_match(regexp_http_req_first, raw, 4, mat) != 0) {
         log_error("http: regexp_match");
         return NULL;
     }
+    *p = '\r';
 
-    char *method = line;
-    line[mat[1].rm_eo] = '\0';
-    req->method = str_from(method);
+    req->method = str_nfrom(raw, 0, mat[1].rm_eo);
     if (req->method == NULL) {
         log_error("http: parse error: no method");
         return NULL;
     }
 
-    char *addr = &line[mat[2].rm_so];
-    line[mat[2].rm_eo] = '\0';
-    req->addr = url_parse(addr);
+    str_t addr = str_nfrom(raw, mat[2].rm_so, mat[2].rm_eo - mat[2].rm_so);
+    req->addr = url_parse(str_tocc(addr));
     if (req->addr == NULL) {
         log_error("http: parse error: no url");
         return NULL;
     }
 
-    char *version = &line[mat[3].rm_so];
-    line[mat[3].rm_eo] = '\0';
-    req->version = str_from(version);
+    req->version = str_nfrom(raw, mat[3].rm_so, mat[3].rm_eo - mat[3].rm_so);
     if (req->version == NULL) {
         log_error("http: parse error: no version");
         return NULL;
@@ -79,7 +70,21 @@ http_req_t http_req_new(char *raw, len_t len, int fd)
     req->raw = raw;
     req->raw_len = len;
 
-    // TODO: the rest content: header, body
+    // headers
+    req->headers = (http_header_t)map_new(64);
+    if (req->headers == NULL) {
+        log_error("http: map_new headers");
+        return NULL;
+    }
+
+    char *line = next_line(strchr(raw, '\n') + 1);
+
+    for ( ;line && line[0] != '\r'; line = next_line(line)) {
+        char *pcolon = strchr(line, ':');
+        char *pcr = strchr(line, '\r');
+        map_set(req->headers, str_nfrom(line, 0, pcolon - line),
+                str_nfrom(pcolon+2, 0, pcr - pcolon));
+    }
     return req;
 }
 

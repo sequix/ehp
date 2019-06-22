@@ -22,7 +22,7 @@ $ ./build.sh test
 $ ./build.sh clean
 
 # build release version
-$ ./build.sh build
+$ ./build.sh release
 ```
 
 ## Where did you get the test site in /root?

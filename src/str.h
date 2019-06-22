@@ -21,6 +21,9 @@ typedef CORD str_t;
 // make a str_t from a char* or const char*
 #define str_from(s) CORD_from_char_star(s)
 
+// make a str_t with at most n chars, starts at i
+str_t str_nfrom(const char *s, int i, int n);
+
 // convert str_t to char*
 #define str_toc(s) CORD_to_char_star(s)
 

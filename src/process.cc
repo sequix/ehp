@@ -270,19 +270,30 @@ void prspool_run_worker(void)
 
             int len = 0;
             bool closed = false;
+            http_req_t req = NULL;
             char *raw_body = file_read_nonblock(ev->fd, &len, &closed);
 
-            if (closed) {
-                log_debug("connection %r closed", socket_peer_addr(ev->fd));
-                poller_delfd(plr, ev->fd);
-                continue;
+            if (len > 0) {
+                req = http_req_new(raw_body, len, ev->fd);
+                log_info("%r %s %s", req->remote_addr, req->method,
+                        req->addr->path);
+                http_rsp_t rsp = http_rsp_from_file(req->addr->path);
+                http_rsp_write(rsp, ev->fd);
             }
 
-            http_req_t req = http_req_new(raw_body, len, ev->fd);
-            log_info("%r %s %s", req->remote_addr, req->method, req->addr->path);
+            bool conn_keep_alive =
+                str_eq(map_get(req->headers, "Connection"), "keep-alive");
+            
+            bool conn_close = 
+                str_eq(map_get(req->headers, "Connection"), "close");
 
-            http_rsp_t rsp = http_rsp_from_file(req->addr->path);
-            http_rsp_write(rsp, ev->fd);
+            bool http11 = str_eq(req->version, "HTTP/1.1");
+
+
+            if (closed || (http11 && conn_close) || (!http11 && !conn_keep_alive)) {
+                log_debug("connection %r closed", socket_peer_addr(ev->fd));
+                poller_delfd(plr, ev->fd);
+            }
             continue;
         }
 
