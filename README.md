@@ -12,7 +12,6 @@ ehp is a HTTP server, which also is my graduation design.
 $ yum install gc-devel gtest-devel
 
 # debug the server with following commands:
-$ source switch.sh
 $ ./build.sh
 $ _output/ehp --debug -c ./config
 
