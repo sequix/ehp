@@ -61,3 +61,5 @@ http_rsp_t http_rsp_from_file(str_t filepath);
 int http_rsp_write(http_rsp_t rsp, int fd);
 
 typedef int (*http_handler_t)(const http_req_t request, http_rsp_t response);
+
+void http_init();

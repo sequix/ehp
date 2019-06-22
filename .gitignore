@@ -1,6 +1,8 @@
 # ehp build directory
 _output
 src/config.h
+root
+log
 
 # Prerequisites
 *.d

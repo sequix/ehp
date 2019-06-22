@@ -12,8 +12,8 @@ set (config_default_log_file /var/log/ehp)
 set (global_libraries m gc cord pthread)
 
 project (${project_name})
-set(CMAKE_C_FLAGS_DEBUG "$ENV{CXXFLAGS} -std=gnu99 -O0 -Wall -g -ggdb -DDEBUG")
-set(CMAKE_C_FLAGS_RELEASE "$ENV{CXXFLAGS} -std=gnu99 -O3 -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 # Program config files
 configure_file (
@@ -23,14 +23,9 @@ configure_file (
 
 # Binary config files
 configure_file (
-  "${PROJECT_SOURCE_DIR}/config-example.in"
-  "${PROJECT_SOURCE_DIR}/config-example"
+  "${PROJECT_SOURCE_DIR}/config.in"
+  "${PROJECT_SOURCE_DIR}/config"
 )
-
-#configure_file (
-#  "${PROJECT_SOURCE_DIR}/config.in"
-#  "${PROJECT_SOURCE_DIR}/config"
-#)
 
 # Debug & Release building
 if(NOT ${CMAKE_BUILD_TYPE} STREQUAL "Test")

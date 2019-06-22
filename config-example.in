@@ -1,9 +1,0 @@
-# this is comment, no support for comment within a line
-address: 127.0.0.1
-port: 8080
-worker: 4
-backlog: 32
-timeout: 10
-log_file: @PROJECT_SOURCE_DIR@/log
-www_root: @PROJECT_SOURCE_DIR@/root
-

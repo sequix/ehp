@@ -31,7 +31,7 @@ case ${1:-debug} in
         ;;
     clean)
         rm -rf $BUILD_DIR
-        rm -f $CURDIR/config-example $CURDIR/ehp.log $CURDIR/src/config.h
+        rm -f $CURDIR/config $CURDIR/log $CURDIR/src/config.h
         ;;
     *)
         print_help
