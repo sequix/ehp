@@ -4,7 +4,7 @@ enable_testing()
 find_package(GTest REQUIRED)
 include_directories(../src)
 include_directories(${GTEST_INCLUDE_DIR})
-set (test_objs ../src/array.cc;../src/str.cc;../src/map.cc)
+set (test_objs ../src/args.cc;../src/array.cc;../src/config.cc;../src/file.cc;../src/http.cc;../src/http_constant.cc;../src/lock.cc;../src/log.cc;../src/map.cc;../src/net.cc;../src/poller.cc;../src/process.cc;../src/psignal.cc;../src/ptime.cc;../src/ptimer.cc;../src/regexp.cc;../src/str.cc;../src/url.cc)
 
 macro (new_test test_name)
     set (test_exec "test-${test_name}")

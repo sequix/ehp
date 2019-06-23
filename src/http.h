@@ -5,7 +5,7 @@
 #include <sys/types.h>
 
 typedef map_t http_header_t;
-#define http_header_new() (http_header_t)map_new(64)
+#define http_header_new() (http_header_t)map_new()
 int   http_header_insert(http_header_t *header, const char *line);
 char* http_header_get(http_header_t *header, const char *key);
 int   http_header_set(http_header_t *header, const char *key, const char *value);

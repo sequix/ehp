@@ -10,7 +10,7 @@ static url_t url_new(void)
     if (url == NULL) {
         return NULL;
     }
-    url->query = map_new(64);
+    url->query = map_new();
     if (url->query == NULL) {
         return NULL;
     }

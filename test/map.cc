@@ -4,9 +4,7 @@
 
 TEST(map_t, basic)
 {
-    int nb = 32;
-    map_t map = map_new(nb);
-    EXPECT_EQ(nb, map->nbuckets);
+    map_t map = map_new();
 
     map_set(map, "k1", "v1");
     EXPECT_STREQ("v1", map_get(map, "k1"));

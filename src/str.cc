@@ -158,3 +158,12 @@ array_t str_nsplit(str_t str, char sep, int n)
     array_push_back(arr, str_sub(str, i, len-i));
     return arr;
 }
+
+// return true if x = y, false if otherwise
+bool str_eq(str_t x, str_t y)
+{
+    if (((x==NULL || x==STR_EMPTY)) && (y==NULL || y==STR_EMPTY)) {
+        return true;
+    }
+    return !str_cmp(x, y);
+}

@@ -46,8 +46,12 @@ int tcp_accept(int listenfd)
 
     int connfd = accept(listenfd, (struct sockaddr*)&addr, &addrlen);
     if (connfd < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            errno = 0;
+            return -1;
+        }
         log_debug("failed to accept connection");
-        return connfd;
+        return -2;
     }
     log_debug("new connection from %r", socket_addr_to_str(&addr));
     return connfd;

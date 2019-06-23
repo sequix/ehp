@@ -2,7 +2,7 @@
 
 #include <gc.h>
 
-// typed allocation
+// typed allocation, clear allocated storage automatically
 #define talloc(T)        (T*)GC_MALLOC(sizeof(T))
 
 // sized & typed allocation

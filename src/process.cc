@@ -146,7 +146,7 @@ void prspool_run_master(void)
     // whether to stop the server
     bool stop = false;
 
-    poller_t plr = poller_new(5);
+    poller_t plr = poller_new(64);
     int listenfd = the_prspool->listenfd;
 
     signal_init();
@@ -216,6 +216,8 @@ static void worker_handle_signals(int fd, bool *stop)
 
 void prspool_run_worker(void)
 {
+    char buf[512];
+
     // whether to stop the server
     bool stop = false;
 
@@ -230,13 +232,13 @@ void prspool_run_worker(void)
 
     // TODO: nonblocking write
     // for nonblocking write, where the last write go
-    //map_t wm_pos = map_new(4096);
+    //map_t wm_pos = map_new()(4096);
     // for nonblocking write, what content to write
-    //map_t wm_content = map_new(4096);
+    //map_t wm_content = map_new()(4096);
 
     ptimer_init();
     signal_init();
-    poller_t plr = poller_new(5);
+    poller_t plr = poller_new(64);
     the_worker->plr = plr;
 
     poller_addfd(plr, signal_pipefd[0]);
@@ -249,12 +251,21 @@ void prspool_run_worker(void)
             continue;
         }
 
-        // new connection
+        // new connections
         if (ev->fd == worker_pipe[0] && ev->type == POLLER_EVENT_TYPE_READ) {
-            int connfd = tcp_accept(listenfd);
-            if (connfd < 0) continue;
-            poller_addfd(plr, connfd);
-            ptimer_add(ptime_epoch(), timeout_in_ms, connfd);
+            int ret = read(ev->fd, &buf, sizeof(buf));
+            if (ret == 0 || (ret<0 && (errno==EAGAIN||errno==EWOULDBLOCK))) {
+                continue;
+            }
+            if (ret < 0) {
+                log_error("worker read connection pipe failed");
+                continue;
+            }
+            int connfd = 0;
+            while ((connfd = tcp_accept(listenfd)) >= 0) {
+                poller_addfd(plr, connfd);
+                ptimer_add(ptime_epoch(), timeout_in_ms, connfd);
+            }
             continue;
         }
 
@@ -279,18 +290,20 @@ void prspool_run_worker(void)
                         req->addr->path);
                 http_rsp_t rsp = http_rsp_from_file(req->addr->path);
                 http_rsp_write(rsp, ev->fd);
+            
+                bool conn_keep_alive =
+                    str_eq(map_get(req->headers, "Connection"), "keep-alive");
+
+                bool conn_close = 
+                    str_eq(map_get(req->headers, "Connection"), "close");
+
+                bool http11 = str_eq(req->version, "HTTP/1.1");
+
+                closed |= (http11 && conn_close)
+                          || (!http11 && !conn_keep_alive);
             }
 
-            bool conn_keep_alive =
-                str_eq(map_get(req->headers, "Connection"), "keep-alive");
-            
-            bool conn_close = 
-                str_eq(map_get(req->headers, "Connection"), "close");
-
-            bool http11 = str_eq(req->version, "HTTP/1.1");
-
-
-            if (closed || (http11 && conn_close) || (!http11 && !conn_keep_alive)) {
+            if (closed) {
                 log_debug("connection %r closed", socket_peer_addr(ev->fd));
                 poller_delfd(plr, ev->fd);
             }

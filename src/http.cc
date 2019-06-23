@@ -38,6 +38,10 @@ http_req_t http_req_new(char *raw, len_t len, int fd)
     }
 
     char *p = strchr(raw, '\r');
+    if (!p) {
+        log_error("http: invalid http message");
+        return req;
+    }
     *p = '\0';
     regexp_submatch_st mat[4];
 
@@ -71,19 +75,19 @@ http_req_t http_req_new(char *raw, len_t len, int fd)
     req->raw_len = len;
 
     // headers
-    req->headers = (http_header_t)map_new(64);
+    req->headers = (http_header_t)map_new();
     if (req->headers == NULL) {
-        log_error("http: map_new headers");
+        log_error("http: map_new() headers");
         return NULL;
     }
 
-    char *line = next_line(strchr(raw, '\n') + 1);
+    char *line = next_line(raw);
 
     for ( ;line && line[0] != '\r'; line = next_line(line)) {
         char *pcolon = strchr(line, ':');
         char *pcr = strchr(line, '\r');
         map_set(req->headers, str_nfrom(line, 0, pcolon - line),
-                str_nfrom(pcolon+2, 0, pcr - pcolon));
+                str_nfrom(pcolon+2, 0, pcr - pcolon - 2));
     }
     return req;
 }

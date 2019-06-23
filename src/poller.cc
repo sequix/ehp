@@ -31,7 +31,7 @@ poller_t poller_new(len_t cap)
         exit(1);
     }
 
-    plr->fds = map_new(4096);
+    plr->fds = map_new();
     if (!plr->fds) {
         log_error("poller: init plr->fds");
         exit(1);
@@ -41,12 +41,11 @@ poller_t poller_new(len_t cap)
 
 void poller_addfd(poller_t plr, int fd)
 {
+    file_set_nonblock(fd);
     struct epoll_event event;
     event.data.fd = fd;
     event.events = EPOLLIN | EPOLLET;
     epoll_ctl(plr->epollfd, EPOLL_CTL_ADD, fd, &event);
-
-    file_set_nonblock(fd);
     map_set(plr->fds, str_from_uint64(fd), str_from("1"));
 }
 

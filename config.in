@@ -3,7 +3,7 @@ address: 127.0.0.1
 port: 8080
 worker: 4
 backlog: 32
-timeout: 30
+timeout: 60
 log_file: @PROJECT_SOURCE_DIR@/log
 www_root: @PROJECT_SOURCE_DIR@/root
 

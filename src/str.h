@@ -59,7 +59,7 @@ str_t str_from_uint64(int64_t x);
 #define str_at(s,i) CORD_fetch(s,i)
 
 // return true if x = y, false if otherwise
-#define str_eq(x,y) (!CORD_cmp(x,y))
+bool str_eq(str_t x, str_t y);
 
 // return < 0, 0, or > 0, depending on whether x < y, x = y, x > y
 #define str_cmp(x,y) CORD_cmp(x,y)

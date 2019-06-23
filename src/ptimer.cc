@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/time.h>
+#include <stdlib.h>
 
 #define PTIMER_INIT_SIZE 8
 
@@ -44,13 +45,18 @@ void ptimer_init(void)
     the_timer->heap = stalloc(PTIMER_INIT_SIZE, ptimer_node_t);
     the_timer->len = 0;
     the_timer->cap = PTIMER_INIT_SIZE;
-    the_timer->updated_at = map_new(4096);
+    the_timer->updated_at = map_new();
 }
 
 static void ptimer_heap_realloc(void)
 {
     len_t new_cap = the_timer->cap << 1;
     the_timer->heap = stralloc(the_timer->heap, new_cap, ptimer_node_t);
+    if (!the_timer->heap) {
+        log_error("timer heap realloc failed");
+        exit(1);
+    }
+    the_timer->cap = new_cap;
 }
 
 static void ptimer_heap_push(ptimer_node_t node)

@@ -9,9 +9,9 @@ config_t config = NULL;
 
 int config_init(str_t filename)
 {
-    config = (config_t)map_new(32);
+    config = (config_t)map_new();
     if (config == NULL) {
-        log_odebug("config: map_new");
+        log_odebug("config: map_new()");
         exit(1);
     }
 
