@@ -5,3 +5,6 @@ typedef unsigned int len_t;
 
 // hash type
 typedef unsigned long hash_t;
+
+// node type
+typedef void* node_t;

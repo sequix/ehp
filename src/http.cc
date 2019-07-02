@@ -145,8 +145,7 @@ http_rsp_t http_rsp_from_file(str_t filepath)
     return rsp;
 }
 
-
-int http_rsp_write(http_rsp_t rsp, int fd)
+char* http_rsp_text(http_rsp_t rsp)
 {
     char buf[4096];
 
@@ -154,16 +153,17 @@ int http_rsp_write(http_rsp_t rsp, int fd)
         http_get_status_msg(rsp->status));
 
     len += sprintf(buf+len, "Content-Length: %d\r\n\r\n", rsp->len);
+    buf[len] = '\0';
 
-    if (write(fd, buf, len) != len) {
-        log_error("write response upper part failed");
-        return -1;
-    }
+    char *body = stalloc(rsp->len + len + 1, char);
+    strncpy(body, buf, len);
 
-    if (sendfile(fd, rsp->bodyfd, NULL, rsp->len) != rsp->len) {
-        log_error("sendfile response body failed");
-        return -1;
+    if (read(rsp->bodyfd, body + len, rsp->len) != rsp->len) {
+        log_error("http_rsp_text: read");
+        return STR_EMPTY;
     }
+    body[len + rsp->len + 1] = '\0';
     close(rsp->bodyfd);
-    return 0;
+    return body;
 }
+

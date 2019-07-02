@@ -3,14 +3,14 @@
 #include "log.h"
 #include <stdlib.h>
 
-#define MAP_INIT_CAP 64
+#define MAP_INIT_CAP 16
 
 map_t map_new(void)
 {
     map_t map = talloc(map_st);
     if (!map) {
         log_error("map_new(): talloc");
-        exit(2);
+        exit(1);
     }
     map->len = 0;
     map->cap = MAP_INIT_CAP;
@@ -20,9 +20,85 @@ map_t map_new(void)
     map->bks = stalloc(MAP_INIT_CAP, map_node_t);
     if (!map->bks) {
         log_error("map_new(): stalloc");
-        exit(2);
+        exit(1);
     }
     return map;
+}
+
+static int map_set_actual(map_t map, map_node_t node)
+{
+    map_node_t *bks = map->bks;
+    map_hash_t hash = str_hash(node->key) & map->capm1;
+    map_hash_t i = hash;
+
+    do {
+        if (!bks[i] || str_eq(node->key, bks[i]->key)) {
+            bks[i] = node;
+            return 0;
+        }
+        i = (i + 1) & map->capm1;
+    } while (i != hash);
+    return -1;
+}
+
+// TODO: mimic redis, realloc on the fly
+static int map_realloc(map_t map)
+{
+    len_t old_cap = map->cap;
+    map_node_t *old_bks = map->bks;
+
+    len_t new_cap = old_cap << 1;
+    map_node_t *new_bks = stalloc(new_cap, map_node_t);
+    if (!new_bks) {
+        log_error("map_realloc: stalloc");
+        exit(2);
+    }
+    map->bks = new_bks;
+    map->cap = new_cap;
+    map->capm1 = new_cap - 1;
+    map->factor = (new_cap>>1) + (new_cap>>2);
+
+    len_t cnt = 0;
+    for (len_t i = 0; i < old_cap; ++i) {
+        if (!map->bks[i]) continue;
+        if (map_set_actual(map, old_bks[i]) < 0) {
+            return -1;
+        }
+        if (++cnt >= map->len) break;
+    }
+    return 0;
+}
+
+static map_node_t map_node_new(str_t key, str_t value)
+{
+    map_node_t node = talloc(map_node_st);
+    if (!node) {
+        log_error("map_node_new: talloc");
+        exit(1);
+    }
+    node->key = key;
+    node->value = value;
+    return node;
+}
+
+int map_set(map_t map, str_t key, str_t value)
+{
+    if (map->len >= map->factor) {
+        if (map_realloc(map) < 0) {
+            return -1;
+        }
+    }
+
+    map_node_t node = map_node_new(key, value);
+    if (!node) {
+        return -1;
+    }
+
+    if (map_set_actual(map, node) < 0) {
+        return -1;
+    }
+    ++map->len;
+    return 0;
 }
 
 static map_node_t map_getref(map_t map, str_t key)
@@ -37,74 +113,6 @@ static map_node_t map_getref(map_t map, str_t key)
         i = (i + 1) & map->capm1;
     } while (i != hash);
     return NULL;
-}
-
-static void map_insert(map_node_t node, map_node_t *bks, len_t capm1)
-{
-    map_hash_t hash = str_hash(node->key) & capm1;
-    map_hash_t i = hash;
-
-    do {
-        if (!bks[i]) {
-            bks[i] = node;
-            return;
-        }
-        i = (i + 1) & capm1;
-    } while (i != hash);
-}
-
-static void map_insert_kv(str_t key, str_t value, map_node_t *bks, len_t capm1)
-{
-    map_node_t node = talloc(map_node_st);
-    if (!node) {
-        log_error("map_insert_kv: node alloc");
-        exit(2);
-    }
-    node->key = key;
-    node->value = value;
-    map_insert(node, bks, capm1);
-}
-
-// TODO: mimic redis, realloc on the fly
-static void map_realloc(map_t map)
-{
-    len_t new_cap = map->cap << 1;
-    len_t new_capm1 = new_cap - 1;
-    len_t new_factor = (new_cap>>1) + (new_cap>>2);
-
-    map_node_t *new_bks = stalloc(new_cap, map_node_t);
-    if (!new_bks) {
-        log_error("map_realloc: stalloc");
-        exit(2);
-    }
-
-    len_t cnt = 0;
-    for (len_t i = 0; i < map->cap; ++i) {
-        if (!map->bks[i]) continue;
-        map_insert(map->bks[i], new_bks, new_capm1);
-        if (++cnt >= map->len) break;
-    }
-    map->bks = new_bks;
-    map->cap = new_cap;
-    map->capm1 = new_capm1;
-    map->factor = new_factor;
-}
-
-int map_set(map_t map, str_t key, str_t value)
-{
-    if (map->len >= map->factor) {
-        map_realloc(map);
-    }
-
-    map_node_t p = map_getref(map, key);
-    if (p) {
-        p->value = value;
-        return 0;
-    }
-
-    map_insert_kv(key, value, map->bks, map->capm1);
-    ++map->len;
-    return 0;
 }
 
 str_t map_get(map_t map, str_t key)

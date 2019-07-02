@@ -66,8 +66,8 @@ char *file_read_nonblock(int fd, int *len, bool *closed)
     }
 
     while (1) {
-        int len = read(fd, buf+buflen, bufcap-buflen);
-        if (len < 0) {
+        int clen = read(fd, buf+buflen, bufcap-buflen);
+        if (clen < 0) {
             if (errno == EWOULDBLOCK || errno == EAGAIN) {
                 errno = 0;
                 break;
@@ -76,11 +76,11 @@ char *file_read_nonblock(int fd, int *len, bool *closed)
             return NULL;
         }
 
-        if (len == 0) {
+        if (clen == 0) {
             *closed = true;
             return buf;
         }
-        buflen += len;
+        buflen += clen;
 
         if (buflen >= bufcap) {
             bufcap <<= 1;

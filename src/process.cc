@@ -1,4 +1,5 @@
 #include "process.h"
+#include "lru.h"
 #include "config.h"
 #include "log.h"
 #include "net.h"
@@ -16,6 +17,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <errno.h>
+#include <string.h>
 
 // the global processes pool
 prspool_t the_prspool = NULL;
@@ -230,6 +232,9 @@ void prspool_run_worker(void)
     // connection timeout in milliseconds
     uint64_t timeout_in_ms = config_get_int(CONFIG_TIMEOUT) * 1000;
 
+    // 256 KiB
+    lru_t lru = lru_new(256 * 1024);
+
     // TODO: nonblocking write
     // for nonblocking write, where the last write go
     //map_t wm_pos = map_new()(4096);
@@ -288,9 +293,20 @@ void prspool_run_worker(void)
                 req = http_req_new(raw_body, len, ev->fd);
                 log_info("%r %s %s", req->remote_addr, req->method,
                         req->addr->path);
-                http_rsp_t rsp = http_rsp_from_file(req->addr->path);
-                http_rsp_write(rsp, ev->fd);
-            
+
+                str_t key = str_from(raw_body);
+                str_t cache = lru_get(lru, key);
+                const char *rsp_text = NULL;
+
+                if (cache != STR_EMPTY) {
+                    rsp_text = str_tocc(cache);
+                } else {
+                    http_rsp_t rsp = http_rsp_from_file(req->addr->path);
+                    rsp_text = http_rsp_text(rsp);
+                    lru_set(lru, str_from(raw_body), str_from(rsp_text));
+                }
+                write(ev->fd, rsp_text, strlen(rsp_text));
+
                 bool conn_keep_alive =
                     str_eq(map_get(req->headers, "Connection"), "keep-alive");
 
@@ -302,6 +318,7 @@ void prspool_run_worker(void)
                 closed |= (http11 && conn_close)
                           || (!http11 && !conn_keep_alive);
             }
+            GC_free(raw_body);
 
             if (closed) {
                 log_debug("connection %r closed", socket_peer_addr(ev->fd));
